@@ -193,3 +193,5 @@ def test(message):
 # ---------------- RUN ----------------
 threading.Thread(target=check_subs, daemon=True).start()
 bot.infinity_polling()
+pyTelegramBotAPI
+python-dotenv
