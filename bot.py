@@ -218,7 +218,7 @@ def show_tariffs(chat_id, message_id=None):
     markup.add(InlineKeyboardButton("🔥 Ahhh... V.I.P. / 1 MONTH", callback_data="buy_ahhh"))
     markup.add(InlineKeyboardButton("📱 Меню", callback_data="menu"))
 
-    text = "🌭 <b>Привет, зайчик, это мой бот для выдачи доступа к моим приваточкам!</b>\n<b>Hi sweetie, this is my private access bot</b>\n\n <i>Посмотри в меню разогревчик, чтобы понять что тебя ждет</i>/n <i>Выбери подходящий тариф / Choose a plan!</i>👇"
+    text = "🌭 <b>Привет, зайчик\n\n Это мой бот для выдачи доступа к моим приваточкам! Все пополняются регулярно, контент прям из печи 🥵</b>\n<b>Hi sweetie, this is my private access bot</b>\n\n <i>Посмотри в меню разогревчик, чтобы понять что тебя ждет</i>\n <i>Выбери подходящий тариф / Choose a plan!</i>👇"
 
     if message_id:
         bot.edit_message_text(text, chat_id, message_id, reply_markup=markup, parse_mode="HTML")
