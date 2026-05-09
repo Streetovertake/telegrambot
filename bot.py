@@ -8,6 +8,9 @@ TRIAL_VIDEO = "BAACAgIAAxkBAAPCaf9DaCB7kwuocGIH8zyWNb9hpqoAAruWAAJEdPhLDN9OG5h42
 USDT_WALLET = "ТВОЙ_USDT_АДРЕС"
 
 # ---------------- START ----------------
+@bot.message_handler(commands=['start'])
+def start(message):
+    show_tariffs(message.chat.id)
 @bot.callback_query_handler(func=lambda call: call.data == "menu")
 def menu(call):
     bot.answer_callback_query(call.id)
