@@ -3,12 +3,9 @@ import os
 from datetime import datetime, timedelta
 import threading
 import time
-from dotenv import load_dotenv
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 
-# ---------------- LOAD ENV ----------------
-import os
-
+# ---------------- BOT INIT ----------------
 TOKEN = os.environ["TOKEN"]
 ADMIN_ID = int(os.environ["ADMIN_ID"])
 CHANNEL_ID = os.environ["CHANNEL_ID"]
