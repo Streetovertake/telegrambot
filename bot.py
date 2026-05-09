@@ -74,7 +74,7 @@ def menu(call):
 #-------------------plan oplata---------------
 def show_plan(call, title, desc, price, plan_key):
 
-    user_state[call.from_user.id] = {"plan": plan_key}
+    user_state[call.from_user.id] = plan_key
 
     markup = InlineKeyboardMarkup()
 
@@ -100,49 +100,26 @@ def show_plan(call, title, desc, price, plan_key):
     )
     
 #-------------------show-plan-----------------
-def show_plan(call, title, desc, price, plan_key):
+@bot.callback_query_handler(func=lambda call: call.data.startswith("buy_"))
+def buy(call):
+    user_id = call.from_user.id
+    plan_key = call.data.replace("buy_", "", 1)
 
-    markup = InlineKeyboardMarkup()
+    if plan_key not in PLANS:
+        bot.send_message(user_id, "Ошибка тарифа")
+        return
 
-    markup.add(
-        InlineKeyboardButton(
-            "💳 Карта",
-            callback_data=f"pay_card_{plan_key}"
-        )
-    )
+    user_state[user_id] = plan_key
 
-    markup.add(
-        InlineKeyboardButton(
-            "🚀 Boosty",
-            callback_data=f"pay_boosty_{plan_key}"
-        )
-    )
-
-    markup.add(
-        InlineKeyboardButton(
-            "💰 USDT",
-            callback_data=f"pay_usdt_{plan_key}"
-        )
-    )
-
-    markup.add(
-    InlineKeyboardButton("⬅ Назад", callback_data="back_to_tariffs")
-)
-
-    text = (
-        f"🔥 <b>{title}</b>\n\n"
-        f"{desc}\n\n"
-        f"💸 <b>Цена: {price}₽</b>\n\n"
-        f"<i>Выбери способ оплаты:</i>"
-    )
-
-    bot.edit_message_text(
-        text,
-        call.message.chat.id,
-        call.message.message_id,
-        parse_mode="HTML",
-        reply_markup=markup
-    )
+    # сразу показываем тариф экран
+    if plan_key == "basic":
+        buy_basic(call)
+    elif plan_key == "middle":
+        buy_middle(call)
+    elif plan_key == "hot":
+        buy_hot(call)
+    elif plan_key == "ahhh":
+        buy_ahhh(call)
 # ------------------basic---------------------
 @bot.callback_query_handler(func=lambda call: call.data.startswith("buy_"))
 def buy(call):
@@ -296,15 +273,14 @@ def trial(call):
     )
 
 # ---------------- USDT ----------------
-@bot.callback_query_handler(func=lambda call: "pay_usdt" in call.data)
+@bot.callback_query_handler(func=lambda call: call.data.startswith("pay_usdt"))
 def pay_usdt(call):
 
-    plan = user_state.get(call.from_user.id, {}).get("plan")
+    plan = user_state.get(call.from_user.id)
 
     markup = InlineKeyboardMarkup()
-
     markup.add(InlineKeyboardButton("⬅ Назад", callback_data=f"back_plan_{plan}"))
-    markup.add(InlineKeyboardButton("✅ Я оплатил", callback_data=f"paid_{plan}"))
+    markup.add(InlineKeyboardButton("✅ Я оплатил", callback_data="paid"))
 
     bot.edit_message_text(
         f"💰 USDT:\n<code>{USDT_WALLET}</code>",
@@ -319,20 +295,14 @@ def back_plan(call):
 
     plan = call.data.replace("back_plan_", "")
 
-    # возвращаем тот же экран тарифа
-    fake_call = type("obj", (), {
-        "message": call.message,
-        "from_user": call.from_user
-    })
-
     if plan == "basic":
-        buy_basic(fake_call)
+        buy_basic(call)
     elif plan == "middle":
-        buy_middle(fake_call)
+        buy_middle(call)
     elif plan == "hot":
-        buy_hot(fake_call)
+        buy_hot(call)
     elif plan == "ahhh":
-        buy_ahhh(fake_call)
+        buy_ahhh(call)
         
 # ---------------- CARD ----------------
 @bot.callback_query_handler(func=lambda call: "pay_card" in call.data)
@@ -393,8 +363,8 @@ def check_subs():
 # -----------------i paid---------------
 @bot.callback_query_handler(func=lambda call: call.data == "paid")
 def paid(call):
-    user_id = call.from_user.id
 
+    user_id = call.from_user.id
     plan = user_state.get(user_id)
 
     if not plan:
@@ -403,17 +373,23 @@ def paid(call):
 
     pending_payments[user_id] = plan
 
-    bot.send_message(ADMIN_ID,
+    bot.send_message(
+        ADMIN_ID,
         f"💰 ОПЛАТА\nUser: {user_id}\nPlan: {plan}\n\n"
         f"Подтвердить: /confirm_{user_id}"
     )
     
 @bot.message_handler(commands=['confirm'])
 def confirm(message):
+
     if message.from_user.id != ADMIN_ID:
         return
 
     parts = message.text.split("_")
+
+    if len(parts) < 2:
+        return
+
     user_id = int(parts[1])
 
     plan = pending_payments.get(user_id)
