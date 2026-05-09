@@ -8,6 +8,24 @@ bot = telebot.TeleBot(TOKEN)
 USDT_WALLET = "ТВОЙ_USDT_АДРЕС"
 
 # ---------------- START ----------------
+@bot.callback_query_handler(func=lambda call: call.data == "menu")
+def menu(call):
+    bot.answer_callback_query(call.id)
+
+    markup = InlineKeyboardMarkup()
+
+    markup.add(InlineKeyboardButton("📊 Проверить подписку", callback_data="check"))
+    markup.add(InlineKeyboardButton("🎥 Пробное видео", callback_data="trial"))
+    markup.add(InlineKeyboardButton("🏠 Тарифы", callback_data="back"))
+
+    bot.edit_message_text(
+        "📱 <b>Меню</b>\n\n<i>Выбери действие</i>",
+        call.message.chat.id,
+        call.message.message_id,
+        reply_markup=markup,
+        parse_mode="HTML"
+    )
+
 @bot.message_handler(commands=['start'])
 def start(message):
     show_tariffs(message.chat.id)
