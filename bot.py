@@ -4,8 +4,9 @@ from datetime import datetime, timedelta
 import threading
 import time
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
-user_state = {}  # user_id: {"plan": "basic"}
+user_state = {}
 pending_payments = {}
+
 # ---------------- STORAGE ----------------
 subs = {}  # user_id: {expire, plan, warned}
 # ---------------- BOT INIT ----------------
@@ -125,9 +126,8 @@ def show_plan(call, title, desc, price, plan_key):
     )
 
     markup.add(
-        InlineKeyboardButton(
-            "⬅ Назад",
-            callback_data="back"
+    InlineKeyboardButton("⬅ Назад", callback_data="back_to_tariffs")
+)
         )
     )
 
@@ -160,6 +160,7 @@ def buy_basic(call):
         600,
         "basic"
     )
+    user_state[call.from_user.id] = plan_key
     
 # ------------------middle--------------------
 @bot.callback_query_handler(func=lambda call: call.data == "buy_middle")
@@ -176,6 +177,8 @@ def buy_middle(call):
         1600,
         "middle"
     )
+    user_state[call.from_user.id] = plan_key
+    
 # -------------------HOT---------------------
 @bot.callback_query_handler(func=lambda call: call.data == "buy_hot")
 def buy_hot(call):
@@ -191,6 +194,8 @@ def buy_hot(call):
         2500,
         "hot"
     )
+    user_state[call.from_user.id] = plan_key
+    
 #-------------------Ass-----------------------
 @bot.callback_query_handler(func=lambda call: call.data == "buy_ahhh")
 def buy_ahhh(call):
@@ -209,6 +214,8 @@ def buy_ahhh(call):
         4990,
         "ahhh"
     )
+    user_state[call.from_user.id] = plan_key
+    
 # ---------------- GIVE SUB ----------------
 def give_sub(user_id, plan_key):
     plan = PLANS[plan_key]
@@ -382,27 +389,27 @@ def paid(call):
 
     msg = bot.send_message(
         ADMIN_ID,
-        f"💰 Забашлял лавешку, смотри!\nUser: {user_id}\nPlan: {plan}"
+        f"💰 ОПЛАТА\nUser: {user_id}\nPlan: {plan}",
+        reply_markup=InlineKeyboardMarkup().add(
+            InlineKeyboardButton("✅ Подтвердить", callback_data=f"confirm_{user_id}_{plan}")
+        )
     )
-
-    pending_payments[msg.message_id] = (user_id, plan)
 
     bot.send_message(user_id, "⏳ Не торопись, я сама лапками все проверяю...")
     
 @bot.callback_query_handler(func=lambda call: call.data.startswith("confirm_"))
 def confirm(call):
 
-    msg_id = int(call.data.replace("confirm_", ""))
-
-    if msg_id not in pending_payments:
-        bot.answer_callback_query(call.id, "Нет данных")
-        return
-
-    user_id, plan = pending_payments[msg_id]
+    _, user_id, plan = call.data.split("_")
+    user_id = int(user_id)
 
     give_sub(user_id, plan)
 
-    bot.send_message(user_id, "✅ Нашла перевод наконец то! Добро пожаловать! 🔥")
+    bot.send_message(user_id, "✅ Оплата подтверждена! Доступ выдан 🔥")
+    
+@bot.callback_query_handler(func=lambda call: call.data == "back_to_tariffs")
+def back_to_tariffs(call):
+    show_tariffs(call.message.chat.id, call.message.message_id)
     
 # ---------------- BACK ----------------
 @bot.callback_query_handler(func=lambda call: call.data == "back_to_tariffs")
