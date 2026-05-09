@@ -11,6 +11,7 @@ bot = telebot.TeleBot(TOKEN)
 
 subs = {}
 pending_payments = {}
+user_state = {}
 
 PLANS = {
     "basic": {"days": 1, "price": 600, "title": "Basic"},
@@ -22,6 +23,17 @@ PLANS = {
 @bot.message_handler(commands=['start'])
 def start(message):
     show_tariffs(message.chat.id)
+    
+#___
+
+def back_to_plan(call):
+    plan = user_state.get(call.from_user.id)
+
+    if not plan:
+        show_tariffs(call.message.chat.id, call.message.message_id)
+        return
+
+    show_plan(call, plan)
     
 #___
 
@@ -45,6 +57,7 @@ def plan(call):
 
     if plan_key not in PLANS:
         return
+    user_state[call.from_user.id] = plan_key
 
     plan = PLANS[plan_key]
 
@@ -52,7 +65,8 @@ def plan(call):
     markup.add(InlineKeyboardButton("USDT", callback_data=f"usdt_{plan_key}"))
     markup.add(InlineKeyboardButton("Card", callback_data=f"card_{plan_key}"))
     markup.add(InlineKeyboardButton("Boosty", callback_data=f"boosty_{plan_key}"))
-
+    markup.add(InlineKeyboardButton("⬅ Назад", callback_data="back"))
+    
     bot.edit_message_text(
         f"{plan['title']} — {plan['price']}₽",
         call.message.chat.id,
@@ -62,14 +76,17 @@ def plan(call):
 
 #___
 
+@bot.callback_query_handler(func=lambda call: call.data == "back")
+def back(call):
+    show_tariffs(call.message.chat.id)
+
 def pay(call, method, plan_key):
 
-    plan = PLANS.get(plan_key)
-    if not plan:
-        return
+    user_state[call.from_user.id] = plan_key
 
     markup = InlineKeyboardMarkup()
-    markup.add(InlineKeyboardButton("Я оплатил", callback_data=f"paid_{plan_key}"))
+    markup.add(InlineKeyboardButton("⬅ Назад", callback_data="back"))
+    markup.add(InlineKeyboardButton("Я оплатил", callback_data=f"paid_{plan_key}_{method}"))
 
     if method == "usdt":
         text = f"USDT: {USDT_WALLET}"
@@ -108,16 +125,23 @@ def boosty(call):
 def paid(call):
 
     user_id = call.from_user.id
-    plan_key = call.data.split("_")[1]
+    plan_key = user_state.get(user_id)
 
-    pending_payments[user_id] = plan_key
+    if not plan_key:
+        bot.send_message(user_id, "Ошибка: выбери тариф заново")
+        return
+
+    pending_payments[user_id] = {
+        "plan": plan_key,
+        "method": "unknown"
+    }
 
     markup = InlineKeyboardMarkup()
     markup.add(InlineKeyboardButton("Confirm", callback_data=f"confirm_{user_id}"))
 
     bot.send_message(
         ADMIN_ID,
-        f"PAYMENT\nUser: {user_id}\nPlan: {plan_key}",
+        f"💰 PAYMENT\nUser: {user_id}\nPlan: {plan_key}",
         reply_markup=markup
     )
 
@@ -130,10 +154,13 @@ def confirm(call):
         return
 
     user_id = int(call.data.split("_")[1])
-    plan_key = pending_payments.get(user_id)
 
-    if not plan_key:
+    data = pending_payments.get(user_id)
+
+    if not data:
         return
+
+    plan_key = data["plan"]
 
     plan = PLANS[plan_key]
 
@@ -142,10 +169,13 @@ def confirm(call):
         "plan": plan_key
     }
 
-    bot.send_message(user_id, "Оплата подтверждена")
+    bot.send_message(user_id, "✅ Оплата подтверждена")
+    bot.send_message(ADMIN_ID, f"Выдан план {plan_key}")
+
     pending_payments.pop(user_id, None)
     
 #___
+
 if __name__ == "__main__":
     print("🚀 BOT IS STARTING...")
 
