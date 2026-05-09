@@ -88,5 +88,17 @@ def paid(message):
         "✔ Если оплата прошла — вот доступ:",
         reply_markup=markup
     )
+# -----------------------------------------------------
+@bot.callback_query_handler(func=lambda call: call.data == "paid")
+def paid(call):
+    markup = InlineKeyboardMarkup()
 
+    markup.add(InlineKeyboardButton("📌 Приватка 1", url=PRIVATE_1))
+    markup.add(InlineKeyboardButton("📌 Приватка 2", url=PRIVATE_2))
+
+    bot.send_message(call.message.chat.id,
+        "✔ Проверка оплаты...\n\n"
+        "Если всё ок — вот доступ 👇",
+        reply_markup=markup
+    )
 bot.infinity_polling()
