@@ -260,8 +260,9 @@ def show_tariffs(chat_id, message_id=None):
 @bot.callback_query_handler(func=lambda call: call.data.startswith("buy_"))
 def buy(call):
     user_id = call.from_user.id
-    plan = call.data.replace("buy_", "", 1)
+    plan_key = call.data.replace("buy_", "", 1)
 
+    user_state[call.from_user.id] = plan_key
     give_sub(user_id, plan)
 
     bot.send_message(user_id, f"✔ {PLANS[plan]['title']} активирован 🔥")
