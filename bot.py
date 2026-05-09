@@ -12,6 +12,19 @@ bot = telebot.TeleBot(TOKEN)
 subs = {}
 pending_payments = {}
 user_state = {}
+nav_stack = {}
+
+#___stack
+
+def push(user_id, state):
+    nav_stack.setdefault(user_id, []).append(state)
+
+def pop(user_id):
+    if user_id in nav_stack and nav_stack[user_id]:
+        return nav_stack[user_id].pop()
+    return None
+    
+#___plan
 
 PLANS = {
     "basic": {"days": 1, "price": 600, "title": "Basic"},
@@ -22,7 +35,7 @@ PLANS = {
 
 @bot.message_handler(commands=['start'])
 def start(message):
-    show_tariffs(message.chat.id)
+    show_menu(message.chat.id)
     
 #___
 
@@ -35,23 +48,55 @@ def back_to_plan(call):
 
     show_plan(call, plan)
     
-#___
+#___tariffs
 
-def show_tariffs(chat_id):
+def show_tariffs(chat_id, message_id=None, user_id=None):
+
+    if user_id:
+        push(user_id, "menu")
+
     markup = InlineKeyboardMarkup()
 
-    for key, plan in PLANS.items():
+    for k, v in PLANS.items():
         markup.add(InlineKeyboardButton(
-            f"{plan['title']} / {plan['price']}₽",
-            callback_data=f"plan_{key}"
+            f"{v['title']} / {v['price']}₽",
+            callback_data=f"plan_{k}"
         ))
 
-    bot.send_message(chat_id, "Выбери тариф", reply_markup=markup)
+    text = "💰 <b>Выбери тариф</b>"
+
+    if message_id:
+        bot.edit_message_text(text, chat_id, message_id, reply_markup=markup, parse_mode="HTML")
+    else:
+        bot.send_message(chat_id, text, reply_markup=markup, parse_mode="HTML")
     
-#___
+#___menu
+
+def show_menu(chat_id, message_id=None):
+
+    markup = InlineKeyboardMarkup()
+    markup.add(InlineKeyboardButton("📊 Проверить подписку", callback_data="check_sub"))
+    markup.add(InlineKeyboardButton("🎥 Тестовое видео", callback_data="trial"))
+    markup.add(InlineKeyboardButton("💰 Список тарифов", callback_data="tariffs"))
+
+    text = "📱 <b>МЕНЮ</b>"
+
+    if message_id:
+        bot.edit_message_text(text, chat_id, message_id, reply_markup=markup, parse_mode="HTML")
+    else:
+        bot.send_message(chat_id, text, reply_markup=markup, parse_mode="HTML")
+
+#___plan
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith("plan_"))
 def plan(call):
+
+    user_id = call.from_user.id
+    plan_key = call.data.split("_")[1]
+
+    push(user_id, "tariffs")  # 👈 запоминаем, что пришли из списка тарифов
+
+    show_plan(call, plan_key)
 
     plan_key = call.data.split("_")[1]
 
@@ -74,33 +119,56 @@ def plan(call):
         reply_markup=markup
     )
 
-#___
+#___showplan
+
+def show_plan(call, plan_key):
+
+    user_id = call.from_user.id
+    push(user_id, f"plan_{plan_key}")
+
+    plan = PLANS[plan_key]
+
+    markup = InlineKeyboardMarkup()
+    markup.add(InlineKeyboardButton("💳 Карта", callback_data=f"card_{plan_key}"))
+    markup.add(InlineKeyboardButton("💰 USDT", callback_data=f"usdt_{plan_key}"))
+    markup.add(InlineKeyboardButton("🚀 Boosty", callback_data=f"boosty_{plan_key}"))
+
+    markup.add(InlineKeyboardButton("⬅ Назад", callback_data="back"))
+
+    bot.edit_message_text(
+        f"🔥 {plan['title']}\n💸 {plan['price']}₽",
+        call.message.chat.id,
+        call.message.message_id,
+        reply_markup=markup,
+        parse_mode="HTML"
+    )
+    
+#___back
 
 @bot.callback_query_handler(func=lambda call: call.data == "back")
 def back(call):
-    show_tariffs(call.message.chat.id)
 
-def pay(call, method, plan_key):
+    user_id = call.from_user.id
+    prev = pop(user_id)
 
-    user_state[call.from_user.id] = plan_key
+    # если история пустая — кидаем в меню
+    if not prev:
+        show_menu(call.message.chat.id, call.message.message_id)
+        return
 
-    markup = InlineKeyboardMarkup()
-    markup.add(InlineKeyboardButton("⬅ Назад", callback_data="back"))
-    markup.add(InlineKeyboardButton("Я оплатил", callback_data=f"paid_{plan_key}_{method}"))
+    # возврат по шагам
+    if prev == "menu":
+        show_menu(call.message.chat.id, call.message.message_id)
 
-    if method == "usdt":
-        text = f"USDT: {USDT_WALLET}"
-    elif method == "card":
-        text = "Card: 2202..."
+    elif prev == "tariffs":
+        show_tariffs(call.message.chat.id, call.message.message_id)
+
+    elif prev.startswith("plan_"):
+        plan_key = prev.split("_")[1]
+        show_plan(call, plan_key)
+
     else:
-        text = "Boosty link"
-
-    bot.edit_message_text(
-        text,
-        call.message.chat.id,
-        call.message.message_id,
-        reply_markup=markup
-    )
+        show_tariffs(call.message.chat.id, call.message.message_id)
     
 #___
 
