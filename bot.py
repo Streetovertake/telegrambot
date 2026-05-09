@@ -71,9 +71,7 @@ def show_tariffs(chat_id, message_id=None):
     markup.add(InlineKeyboardButton("🔥 Ahhh... V.I.P.", callback_data="buy_ahhh"))
     markup.add(InlineKeyboardButton("📱 Меню", callback_data="menu"))
 
-    text = "🌭 <b>Привет, зайчик, это мой бот для выдачи доступа к моим приваточкам!</b>\n"
-    "<b>Hi sweetie, this is my private access bot</b>"
-    "👇<i>Выбери подходящий тариф / Choose a plan</i>👇"
+    text = "🌭 <b>Привет, зайчик, это мой бот для выдачи доступа к моим приваточкам!</b>\n<b>Hi sweetie, this is my private access bot</b>\n👇<i>Выбери подходящий тариф / Choose a plan</i>👇"
 
     if message_id:
         bot.edit_message_text(text, chat_id, message_id, reply_markup=markup, parse_mode="HTML")
