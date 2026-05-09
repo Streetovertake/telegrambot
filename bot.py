@@ -25,7 +25,7 @@ def menu(call):
         reply_markup=markup,
         parse_mode="HTML"
     )
-#--------------------------------------------
+#----------------------------------------
 @bot.callback_query_handler(func=lambda call: call.data == "trial")
 def trial(call):
     bot.answer_callback_query(call.id)
