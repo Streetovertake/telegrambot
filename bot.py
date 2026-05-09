@@ -214,7 +214,7 @@ def pay_card(call):
     markup.add(InlineKeyboardButton("⬅ Назад", callback_data="back"))
 
     bot.edit_message_text(
-        "💳 Ты выбрал оплату картой\n\n После перевода скидывай скриншот сюда и жди, я пока все проверю:\n<code>2202228406930000</code>",
+        "💳 Ты выбрал оплату картой\n\n После перевода скидывай скриншот сюда и жди, я пока все проверю:\n\n <code>Номер карты: 2202228406930000</code>",
         call.message.chat.id,
         call.message.message_id,
         parse_mode="HTML",
