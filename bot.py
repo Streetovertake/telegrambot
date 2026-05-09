@@ -25,7 +25,7 @@ def show_tariffs(chat_id, message_id=None):
     markup.add(menu_btn)
 
     text = (
-        "🌭Я знаю, зачем ты пришёл...\n"
+        "🌭<i>Я знаю, зачем ты пришёл</i>...\n"
         "🌭I know why you're here...\n\n"
         "👇 Выбери тариф/Choose 👇"
     )
