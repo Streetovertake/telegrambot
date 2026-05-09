@@ -210,21 +210,29 @@ def pay_usdt(call):
 # ---------------- CARD ----------------
 @bot.callback_query_handler(func=lambda call: "pay_card" in call.data)
 def pay_card(call):
+    markup = InlineKeyboardMarkup()
+    markup.add(InlineKeyboardButton("⬅ Назад", callback_data="back"))
+
     bot.edit_message_text(
-        "💳 Карта:\n<code>реквизиты</code>",
+        "💳 Ты выбрал оплату картой/n После перевода скидывай скриншот сюда и жди, я пока все проверю:\n<code>2202228406930000</code>",
         call.message.chat.id,
         call.message.message_id,
-        parse_mode="HTML"
+        parse_mode="HTML",
+        reply_markup=markup
     )
 
 # ---------------- BOOSTY ----------------
 @bot.callback_query_handler(func=lambda call: "pay_boosty" in call.data)
 def pay_boosty(call):
+    markup = InlineKeyboardMarkup()
+    markup.add(InlineKeyboardButton("⬅ Назад", callback_data="back"))
+
     bot.edit_message_text(
-        "🚀 Boosty:\n<code>ссылка</code>",
+        "🚀 Ты выбрал оплату через подписку BOOSTY\n <i> Все просто, переходишь по ссылочке на бусти, оплачиваешь любым удобным способом (СБП, Переводом и т.д.), скидываешь скриншот и никнейм на бусти, я пока все проверю и выдам доступ!:\n<code>Ссылка на бусти</code>",
         call.message.chat.id,
         call.message.message_id,
-        parse_mode="HTML"
+        parse_mode="HTML",
+        reply_markup=markup
     )
 
 # ---------------- CHECK SUBS ----------------
