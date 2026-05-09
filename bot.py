@@ -66,6 +66,37 @@ def show_tariffs(chat_id, message_id=None):
         bot.edit_message_text(text, chat_id, message_id, reply_markup=markup, parse_mode="HTML")
     else:
         bot.send_message(chat_id, text, reply_markup=markup, parse_mode="HTML")
+        
+#-----------------TRIAL----------------
+DEMO_LINK = "https://t.me/+ehe66RnahS5hZTgy"
+
+@bot.callback_query_handler(func=lambda call: call.data == "trial")
+def trial(call):
+    bot.answer_callback_query(call.id)
+
+    markup = InlineKeyboardMarkup()
+    markup.add(
+        InlineKeyboardButton(
+            "🎥 Надень наушники и жми 🔞",
+            url=DEMO_LINK
+        )
+    )
+
+    markup.add(
+        InlineKeyboardButton(
+            "⬅ Назад",
+            callback_data="menu"
+        )
+    )
+
+    bot.edit_message_text(
+        "🎥 <b>Разогревчик / Warmup</b>\n\n"
+        "<i>Нажми 👇туда👇 чтобы посмотреть</i>",
+        call.message.chat.id,
+        call.message.message_id,
+        parse_mode="HTML",
+        reply_markup=markup
+    )
 
 # ---------------- HOT ----------------
 @bot.callback_query_handler(func=lambda call: call.data == "tariff_soft")
