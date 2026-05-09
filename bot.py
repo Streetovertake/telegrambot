@@ -232,29 +232,29 @@ def give_sub(user_id, plan_key):
 def show_tariffs(chat_id, message_id=None):
     markup = InlineKeyboardMarkup()
 
-markup.add(InlineKeyboardButton("💙 Basic / 1 DAY", callback_data="buy_basic"))
-markup.add(InlineKeyboardButton("💛 Middle / 1 WEEK", callback_data="buy_middle"))
-markup.add(InlineKeyboardButton("❤️ HOT / 1 MONTH", callback_data="buy_hot"))
-markup.add(InlineKeyboardButton("🔥 Ahhh... V.I.P. / 1 MONTH", callback_data="buy_ahhh"))
-markup.add(InlineKeyboardButton("📱 Меню", callback_data="menu"))
+    markup.add(InlineKeyboardButton("💙 Basic / 1 DAY", callback_data="buy_basic"))
+    markup.add(InlineKeyboardButton("💛 Middle / 1 WEEK", callback_data="buy_middle"))
+    markup.add(InlineKeyboardButton("❤️ HOT / 1 MONTH", callback_data="buy_hot"))
+    markup.add(InlineKeyboardButton("🔥 Ahhh... V.I.P. / 1 MONTH", callback_data="buy_ahhh"))
+    markup.add(InlineKeyboardButton("📱 Меню", callback_data="menu"))
 
-text = "🌭 <b>Привет, зайчик...</b>"
+    text = "🌭 <b>Привет, зайчик...</b>"
 
-try:
-    bot.edit_message_text(
-        text,
-        chat_id,
-        message_id,
-        reply_markup=markup,
-        parse_mode="HTML"
-    )
-except:
-    bot.send_message(
-        chat_id,
-        text,
-        reply_markup=markup,
-        parse_mode="HTML"
-    )
+    try:
+        bot.edit_message_text(
+            text,
+            chat_id,
+            message_id,
+            reply_markup=markup,
+            parse_mode="HTML"
+        )
+    except:
+        bot.send_message(
+            chat_id,
+            text,
+            reply_markup=markup,
+            parse_mode="HTML"
+        )
 # ---------------- BUY ----------------
 @bot.callback_query_handler(func=lambda call: call.data.startswith("buy_"))
 def buy(call):
