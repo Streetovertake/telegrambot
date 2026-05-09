@@ -173,7 +173,7 @@ def back(call):
     bot.answer_callback_query(call.id)
     show_tariffs(call.message.chat.id)
     
-    @bot.message_handler(content_types=['text'])
+@bot.message_handler(content_types=['text'])
 def test(message):
     print(message.forward_from_chat.id)
 
