@@ -29,9 +29,6 @@ PLANS = {
 @bot.message_handler(commands=['start'])
 def start(message):
     show_tariffs(message.chat.id)
-@bot.message_handler(commands=['test'])
-def test(message):
-    bot.send_message(message.chat.id, "OK")
 
 # ---------------- MENU ----------------
 @bot.callback_query_handler(func=lambda call: call.data == "menu")
@@ -39,13 +36,14 @@ def menu(call):
     bot.answer_callback_query(call.id)
 
     markup = InlineKeyboardMarkup()
-    markup.add(InlineKeyboardButton("📊 Проверь подписку", callback_data="check"))
-    markup.add(InlineKeyboardButton("🔞 Разогрейся бесплатно", callback_data="trial"))
-    markup.add(InlineKeyboardButton("🏠 Выбери подписку", callback_data="back"))
+    markup.add(InlineKeyboardButton("📊 ПРОВЕРКА ПОДПИСКИ", callback_data="check"))
+    markup.add(InlineKeyboardButton("🔞 БЕСПЛАТНЫЙ РАЗОГРЕВ", callback_data="trial"))
+    markup.add(InlineKeyboardButton("🏠 ВЫБОР ТАРИФА", callback_data="back"))
 
     bot.send_message(
         call.message.chat.id,
-        "📱 <b>Меню</b>",
+        "📱 <b>МЕНЮ НАВИГАЦИИ В БОТЕ</b>\n"
+        "<b><i>zazzy private</i></b>"
         parse_mode="HTML",
         reply_markup=markup
     )
@@ -69,13 +67,13 @@ def give_sub(user_id, plan_key):
 def show_tariffs(chat_id, message_id=None):
     markup = InlineKeyboardMarkup()
 
-    markup.add(InlineKeyboardButton("💙 Basic 1D", callback_data="buy_basic"))
-    markup.add(InlineKeyboardButton("💛 Middle 1W", callback_data="buy_middle"))
-    markup.add(InlineKeyboardButton("❤️ HOT 1M", callback_data="buy_hot"))
-    markup.add(InlineKeyboardButton("🔥 Ahhh... V.I.P.", callback_data="buy_ahhh"))
+    markup.add(InlineKeyboardButton("💙 Basic / 1 DAY", callback_data="buy_basic"))
+    markup.add(InlineKeyboardButton("💛 Middle / 1 WEEK", callback_data="buy_middle"))
+    markup.add(InlineKeyboardButton("❤️ HOT / 1 MONTH", callback_data="buy_hot"))
+    markup.add(InlineKeyboardButton("🔥 Ahhh... V.I.P. / 1 MONTH", callback_data="buy_ahhh"))
     markup.add(InlineKeyboardButton("📱 Меню", callback_data="menu"))
 
-    text = "🌭 <b>Привет, зайчик, это мой бот для выдачи доступа к моим приваточкам!</b>\n<b>Hi sweetie, this is my private access bot</b>\n👇<i>Выбери подходящий тариф / Choose a plan</i>👇"
+    text = "🌭 <b>Привет, зайчик, это мой бот для выдачи доступа к моим приваточкам!</b>\n<b>Hi sweetie, this is my private access bot</b>\n\n <i>Посмотри в меню разогревчик, чтобы понять что тебя ждет</i>/n<i>Выбери подходящий тариф / Choose a plan!</i>👇"
 
     if message_id:
         bot.edit_message_text(text, chat_id, message_id, reply_markup=markup, parse_mode="HTML")
@@ -98,11 +96,11 @@ def trial(call):
     bot.answer_callback_query(call.id)
 
     markup = InlineKeyboardMarkup()
-    markup.add(InlineKeyboardButton("🔞 Надень наушники 🔞", url=DEMO_LINK))
+    markup.add(InlineKeyboardButton("🔞 Надень наушники / Use your headphones 🔞", url=DEMO_LINK))
     markup.add(InlineKeyboardButton("⬅ Назад", callback_data="back"))
 
     bot.edit_message_text(
-        "🎥 <b>Разогрев</b>",
+        "🎥 <b>ПРОБНОЕ ВИДЕО ПОСМОТРИ, ЧТОБЫ СКОРЕЕ РЕШИТЬСЯ НА ПОДПИСКУ / CHECK TRIAL VIDEO</b>",
         call.message.chat.id,
         call.message.message_id,
         reply_markup=markup,
