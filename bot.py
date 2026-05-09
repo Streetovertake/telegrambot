@@ -33,20 +33,42 @@ def start(message):
 # ---------------- MENU ----------------
 @bot.callback_query_handler(func=lambda call: call.data == "menu")
 def menu(call):
+
     bot.answer_callback_query(call.id)
 
     markup = InlineKeyboardMarkup()
-    markup.add(InlineKeyboardButton("📊 ПРОВЕРКА ПОДПИСКИ", callback_data="check"))
-    markup.add(InlineKeyboardButton("🔞 БЕСПЛАТНЫЙ РАЗОГРЕВ", callback_data="trial"))
-    markup.add(InlineKeyboardButton("🏠 ВЫБОР ТАРИФА", callback_data="back"))
 
-    bot.send_message(
-    call.message.chat.id,
-    "📱 <b>МЕНЮ НАВИГАЦИИ В БОТЕ</b>\n"
-    "<b><i>zazzy private</i></b>",
-    parse_mode="HTML",
-    reply_markup=markup
-)
+    markup.add(
+        InlineKeyboardButton(
+            "📊 ПРОВЕРКА ПОДПИСКИ",
+            callback_data="check"
+        )
+    )
+
+    markup.add(
+        InlineKeyboardButton(
+            "🔞 БЕСПЛАТНЫЙ РАЗОГРЕВ",
+            callback_data="trial"
+        )
+    )
+
+    markup.add(
+        InlineKeyboardButton(
+            "🏠 ВАРИАНТЫ ПОДПИСОК:3",
+            callback_data="back"
+        )
+    )
+
+    bot.edit_message_text(
+        "📱 <b>МЕНЮ НАВИГАЦИИ В БОТЕ</b>\n\n"
+        "<i>Выбери нужный раздел</i>",
+
+        call.message.chat.id,
+        call.message.message_id,
+
+        parse_mode="HTML",
+        reply_markup=markup
+    )
 
 #-------------------plan oplata---------------
 def show_plan(call, title, desc, price, plan_key):
