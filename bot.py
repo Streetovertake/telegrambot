@@ -3,18 +3,31 @@ import os
 from datetime import datetime, timedelta
 import threading
 import time
+from dotenv import load_dotenv
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 
+# ---------------- LOAD ENV ----------------
+load_dotenv()
+
 TOKEN = os.getenv("TOKEN")
+ADMIN_ID = int(os.getenv("ADMIN_ID"))
+CHANNEL_ID = os.getenv("CHANNEL_ID")
+USDT_WALLET = os.getenv("USDT_WALLET")
+DEMO_LINK = os.getenv("DEMO_LINK")
+
+# ---------------- BOT INIT ----------------
 bot = telebot.TeleBot(TOKEN)
 
-ADMIN_ID = int(os.getenv("ADMIN_ID", "123456789"))
-CHANNEL_ID = "@your_private_channel"
+# ---------------- STORAGE ----------------
+subs = {}  # user_id: {expire, plan, warned}
 
-DEMO_LINK = "https://t.me/+ehe66RnahS5hZTgy"
-USDT_WALLET = "ТВОЙ_USDT_АДРЕС"
-
-subs = {}
+# ---------------- PLANS ----------------
+PLANS = {
+    "basic": {"days": 1, "price": 600, "title": "Basic"},
+    "middle": {"days": 7, "price": 1600, "title": "Middle"},
+    "hot": {"days": 30, "price": 2500, "title": "HOT"},
+    "ahhh": {"days": 30, "price": 4990, "title": "Ahhh"}
+}
 
 # ---------------- PLANS ----------------
 PLANS = {
