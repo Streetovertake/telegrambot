@@ -25,9 +25,9 @@ def menu(call):
 
     markup = InlineKeyboardMarkup()
 
-    markup.add(InlineKeyboardButton("📊 Проверить подписку", callback_data="check"))
-    markup.add(InlineKeyboardButton("🎥 Пробное видео", callback_data="trial"))
-    markup.add(InlineKeyboardButton("🏠 Тарифы", callback_data="back"))
+    markup.add(InlineKeyboardButton("📊 Проверь подписку", callback_data="check"))
+    markup.add(InlineKeyboardButton("🔞 FREE РАЗОГРЕВ", callback_data="trial"))
+    markup.add(InlineKeyboardButton("🏠 Выбери подписку", callback_data="back"))
 
     bot.send_message(
         call.message.chat.id,
@@ -83,7 +83,7 @@ def trial(call):
 
     markup.add(
         InlineKeyboardButton(
-            "🎥 Наушники надел?",
+            "🎥 🔞Надень наушники🔞",
             url=DEMO_LINK
         )
     )
@@ -93,6 +93,14 @@ def trial(call):
             "⬅ Назад",
             callback_data="back"
         )
+    )
+
+    bot.send_message(
+        call.message.chat.id,
+        "🎥 <b>Пробный контент</b>\n\n"
+        "<i>Нажми кнопку ниже чтобы открыть demo канал</i>",
+        parse_mode="HTML",
+        reply_markup=markup
     )
 
     bot.edit_message_text(
