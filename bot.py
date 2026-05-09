@@ -86,11 +86,53 @@ def buy_basic(call):
     show_plan(
         call,
         "Basic / 1 день",
-        "🔹 Доступ на 24 часа в сладенький контент из подписки HOT❤️\n\n"
+        "🔹 Доступ на 24 часа в сладенький контент из подписки HOT❤️(но без чата)\n\n"
         "Красивые фоточки без цензуры!\n\n"
         "Короткие вертикальные видео БЕЗ ЦЕНЗУРЫ",
         600,
         "basic"
+    )
+    
+# ------------------middle--------------------
+@bot.callback_query_handler(func=lambda call: call.data == "buy_middle")
+def buy_middle(call):
+    show_plan(
+        call,
+        "Middle / 1 неделя",
+        "🔹 Доступ на 1 неделю в сладенький контент из подписки HOT❤️(но без чата)\n\n"
+        "Красивые фоточки без цензуры!\n\n"
+        "Короткие вертикальные видео БЕЗ ЦЕНЗУРЫ",
+        1600,
+        "middle"
+    )
+# -------------------HOT---------------------
+@bot.callback_query_handler(func=lambda call: call.data == "buy_hot")
+def buy_hot(call):
+    show_plan(
+        call,
+        "HOT / 1 месяц",
+        "🔹 Доступ на 1 неделю в сладенький контент из подписки HOT❤️\n\n"
+        "Красивые фоточки без цензуры!\n\n"
+        "Короткие вертикальные видео БЕЗ ЦЕНЗУРЫ\n\n"
+        "+Доступ в горяченный чат, в котором я общаюсь с вами!(<i>Псс... я даже кружочки скидываю туда</i>)",
+         2500,
+        "hot"
+    )
+#-------------------Ass-----------------------
+@bot.callback_query_handler(func=lambda call: call.data == "buy_ahhh")
+def buy_ahhh(call):
+    show_plan(
+        call,
+        "Ahhh... VIP",
+        "🥵<b>Доступ к САМОМУ ГОРЯЧЕННОМУ И САМОМУ ВЗРОСЛОМУ КОНТЕНТУ🥵</b>\n\n"
+        "🔞Мои соло-игры, поповые, ротовые и всякие ваши фантазийные тут есть\n\n"
+        "🔞Регулярное пополнение контентом (От 2 раз в неделю)\n\n"
+        "🔞Мои стоны, Кримпай, Крики и Слезы БЕЗ ЦЕНЗУРЫ!\n\n"
+        "🔞Длинные видео по 10-15 минуток!\n\n"
+        "🔞Возможность заказать кастомные видео/кружки/сигнушки!\n\n"
+        "🔞+Доступ к V.I.P чату, в котором общаюсь всегда!\n\n",
+        4990,
+        "ahhh"
     )
 # ---------------- GIVE SUB ----------------
 def give_sub(user_id, plan_key):
@@ -117,7 +159,7 @@ def show_tariffs(chat_id, message_id=None):
     markup.add(InlineKeyboardButton("🔥 Ahhh... V.I.P. / 1 MONTH", callback_data="buy_ahhh"))
     markup.add(InlineKeyboardButton("📱 Меню", callback_data="menu"))
 
-    text = "🌭 <b>Привет, зайчик, это мой бот для выдачи доступа к моим приваточкам!</b>\n<b>Hi sweetie, this is my private access bot</b>\n\n <i>Посмотри в меню разогревчик, чтобы понять что тебя ждет</i>/n<i>Выбери подходящий тариф / Choose a plan!</i>👇"
+    text = "🌭 <b>Привет, зайчик, это мой бот для выдачи доступа к моим приваточкам!</b>\n<b>Hi sweetie, this is my private access bot</b>\n\n <i>Посмотри в меню разогревчик, чтобы понять что тебя ждет</i>/n <i>Выбери подходящий тариф / Choose a plan!</i>👇"
 
     if message_id:
         bot.edit_message_text(text, chat_id, message_id, reply_markup=markup, parse_mode="HTML")
@@ -144,7 +186,7 @@ def trial(call):
     markup.add(InlineKeyboardButton("⬅ Назад", callback_data="back"))
 
     bot.edit_message_text(
-        "🎥 <b>ПРОБНОЕ ВИДЕО ПОСМОТРИ, ЧТОБЫ СКОРЕЕ РЕШИТЬСЯ НА ПОДПИСКУ / CHECK TRIAL VIDEO</b>",
+        "🎥 <b>ПРОБНОЕ ВИДЕО 🔞\n ПОСМОТРИ, ЧТОБЫ СКОРЕЕ РЕШИТЬСЯ НА ПОДПИСКУ / CHECK TRIAL VIDEO</b>",
         call.message.chat.id,
         call.message.message_id,
         reply_markup=markup,
