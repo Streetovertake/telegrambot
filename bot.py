@@ -267,11 +267,11 @@ def check_subs():
 @bot.callback_query_handler(func=lambda call: call.data == "back")
 def back(call):
     bot.answer_callback_query(call.id)
-    show_tariffs(call.message.chat.id)
-    
-@bot.message_handler(content_types=['text'])
-def test(message):
-    print(message.chat.id)
+
+    show_tariffs(
+        call.message.chat.id,
+        call.message.message_id
+    )
 
 # ---------------- RUN ----------------
 threading.Thread(target=check_subs, daemon=True).start()
