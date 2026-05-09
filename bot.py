@@ -48,6 +48,50 @@ def menu(call):
     reply_markup=markup
 )
 
+#-------------------plan oplata---------------
+def show_plan(call, title, desc, price, plan_key):
+    markup = InlineKeyboardMarkup()
+
+    markup.add(
+        InlineKeyboardButton("💰 USDT", callback_data=f"pay_usdt_{plan_key}")
+    )
+    markup.add(
+        InlineKeyboardButton("💳 Карта", callback_data=f"pay_card_{plan_key}")
+    )
+    markup.add(
+        InlineKeyboardButton("🚀 Boosty", callback_data=f"pay_boosty_{plan_key}")
+    )
+    markup.add(
+        InlineKeyboardButton("⬅ Назад", callback_data="back")
+    )
+
+    text = (
+        f"🔥 <b>{title}</b>\n\n"
+        f"{desc}\n\n"
+        f"💰 <b>Цена: {price}₽</b>\n\n"
+        f"👇 <i>Выбери способ оплаты</i>"
+    )
+
+    bot.edit_message_text(
+        text,
+        call.message.chat.id,
+        call.message.message_id,
+        parse_mode="HTML",
+        reply_markup=markup
+    )
+    
+# ------------------basic---------------------
+@bot.callback_query_handler(func=lambda call: call.data == "buy_basic")
+def buy_basic(call):
+    show_plan(
+        call,
+        "Basic / 1 день",
+        "🔹 Доступ на 24 часа в сладенький контент из подписки HOT❤️\n\n"
+        "Красивые фоточки без цензуры!\n\n"
+        "Короткие вертикальные видео БЕЗ ЦЕНЗУРЫ"
+        600,
+        "basic"
+    )
 # ---------------- GIVE SUB ----------------
 def give_sub(user_id, plan_key):
     plan = PLANS[plan_key]
