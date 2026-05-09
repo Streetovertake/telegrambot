@@ -229,7 +229,8 @@ def give_sub(user_id, plan_key):
     )
 
 # ---------------- TARIFS ----------------
-markup = InlineKeyboardMarkup()
+def show_tariffs(chat_id, message_id=None):
+    markup = InlineKeyboardMarkup()
 
 markup.add(InlineKeyboardButton("💙 Basic / 1 DAY", callback_data="buy_basic"))
 markup.add(InlineKeyboardButton("💛 Middle / 1 WEEK", callback_data="buy_middle"))
