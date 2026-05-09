@@ -33,7 +33,7 @@ def trial(call):
     markup = InlineKeyboardMarkup()
     markup.add(InlineKeyboardButton("🏠 Назад", callback_data="menu"))
 
-    bot.send_message(
+    bot.send_video(
         call.message.chat.id,
         "🎥 <i>Пробное видео</i>\n\n<i>Демо-контент</i>",
         parse_mode="HTML",
