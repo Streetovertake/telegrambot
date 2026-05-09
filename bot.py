@@ -5,6 +5,7 @@ import threading
 import time
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 user_state = {}  # user_id: {"plan": "basic"}
+pending_payments = {}
 
 # ---------------- BOT INIT ----------------
 TOKEN = os.environ["TOKEN"]
