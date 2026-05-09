@@ -35,9 +35,9 @@ def menu(call):
     bot.answer_callback_query(call.id)
 
     markup = InlineKeyboardMarkup()
-    markup.add(InlineKeyboardButton("📊 Проверить подписку", callback_data="check"))
-    markup.add(InlineKeyboardButton("🔞 FREE", callback_data="trial"))
-    markup.add(InlineKeyboardButton("🏠 Тарифы", callback_data="back"))
+    markup.add(InlineKeyboardButton("📊 Проверь подписку", callback_data="check"))
+    markup.add(InlineKeyboardButton("🔞 Разогрейся бесплатно", callback_data="trial"))
+    markup.add(InlineKeyboardButton("🏠 Выбери подписку", callback_data="back"))
 
     bot.send_message(
         call.message.chat.id,
@@ -65,13 +65,15 @@ def give_sub(user_id, plan_key):
 def show_tariffs(chat_id, message_id=None):
     markup = InlineKeyboardMarkup()
 
-    markup.add(InlineKeyboardButton("💙 Basic 600₽", callback_data="buy_basic"))
-    markup.add(InlineKeyboardButton("💛 Middle 1600₽", callback_data="buy_middle"))
-    markup.add(InlineKeyboardButton("❤️ HOT 2500₽", callback_data="buy_hot"))
-    markup.add(InlineKeyboardButton("🔥 Ahhh 4990₽", callback_data="buy_ahhh"))
+    markup.add(InlineKeyboardButton("💙 Basic 1D", callback_data="buy_basic"))
+    markup.add(InlineKeyboardButton("💛 Middle 1W", callback_data="buy_middle"))
+    markup.add(InlineKeyboardButton("❤️ HOT 1M", callback_data="buy_hot"))
+    markup.add(InlineKeyboardButton("🔥 Ahhh... V.I.P.", callback_data="buy_ahhh"))
     markup.add(InlineKeyboardButton("📱 Меню", callback_data="menu"))
 
-    text = "🌭 <b>Выбери тариф</b>"
+    text = "🌭 <b>Привет, зайчик, это мой бот для выдачи доступа к моим приваточкам!</b>\n"
+    "<b>Hi sweetie, this is my private access bot</b>"
+    "👇<i>Выбери подходящий тариф / Choose a plan</i>👇"
 
     if message_id:
         bot.edit_message_text(text, chat_id, message_id, reply_markup=markup, parse_mode="HTML")
@@ -94,7 +96,7 @@ def trial(call):
     bot.answer_callback_query(call.id)
 
     markup = InlineKeyboardMarkup()
-    markup.add(InlineKeyboardButton("🔞 Открыть", url=DEMO_LINK))
+    markup.add(InlineKeyboardButton("🔞 Надень наушники 🔞", url=DEMO_LINK))
     markup.add(InlineKeyboardButton("⬅ Назад", callback_data="back"))
 
     bot.edit_message_text(
