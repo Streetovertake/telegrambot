@@ -10,20 +10,12 @@ TOKEN = os.environ["TOKEN"]
 ADMIN_ID = int(os.environ["ADMIN_ID"])
 CHANNEL_ID = os.environ["CHANNEL_ID"]
 USDT_WALLET = os.environ["USDT_WALLET"]
-
+DEMO_LINK = os.environ["DEMO_LINK"]
 # ---------------- BOT INIT ----------------
 bot = telebot.TeleBot(TOKEN)
 
 # ---------------- STORAGE ----------------
 subs = {}  # user_id: {expire, plan, warned}
-
-# ---------------- PLANS ----------------
-PLANS = {
-    "basic": {"days": 1, "price": 600, "title": "Basic"},
-    "middle": {"days": 7, "price": 1600, "title": "Middle"},
-    "hot": {"days": 30, "price": 2500, "title": "HOT"},
-    "ahhh": {"days": 30, "price": 4990, "title": "Ahhh"}
-}
 
 # ---------------- PLANS ----------------
 PLANS = {
