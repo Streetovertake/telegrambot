@@ -282,15 +282,20 @@ def trial(call):
 # ---------------- USDT ----------------
 @bot.callback_query_handler(func=lambda call: "pay_usdt" in call.data)
 def pay_usdt(call):
+
+    plan = user_state.get(call.from_user.id, {}).get("plan")
+
     markup = InlineKeyboardMarkup()
-    markup.add(InlineKeyboardButton("⬅ Назад", callback_data="back"))
+
+    markup.add(InlineKeyboardButton("✅ Я оплатил", callback_data=f"paid_{plan}"))
+    markup.add(InlineKeyboardButton("⬅ Назад", callback_data=f"buy_{plan}"))
 
     bot.edit_message_text(
-        f"💰 USDT:\n<code>{USDT_WALLET}</code>",
+        f"💰 USDT:\n<code>{USDT_WALLET}</code>\n\nПосле оплаты нажми кнопку ниже",
         call.message.chat.id,
         call.message.message_id,
-        reply_markup=markup,
-        parse_mode="HTML"
+        parse_mode="HTML",
+        reply_markup=markup
     )
 
 # ---------------- CARD ----------------
@@ -349,6 +354,40 @@ def check_subs():
 
         time.sleep(60)
 
+# -----------------i paid---------------
+@bot.callback_query_handler(func=lambda call: call.data.startswith("paid_"))
+def paid(call):
+
+    plan = call.data.replace("paid_", "")
+    user_id = call.from_user.id
+
+    pending_payments[user_id] = plan
+
+    bot.send_message(
+        ADMIN_ID,
+        f"💰 Забашлял смотри!\n\nUser: {user_id}\nPlan: {plan}",
+        reply_markup=InlineKeyboardMarkup().add(
+            InlineKeyboardButton("✅ Подтвердить", callback_data=f"confirm_{user_id}")
+        )
+    )
+
+    bot.send_message(user_id, "⏳ Не торопись, я сама лапками все проверяю...")
+    
+@bot.callback_query_handler(func=lambda call: call.data.startswith("confirm_"))
+def confirm(call):
+
+    user_id = int(call.data.replace("confirm_", ""))
+    plan = pending_payments.get(user_id)
+
+    if not plan:
+        bot.answer_callback_query(call.id, "Не пришли денюжки😔")
+        return
+
+    give_sub(user_id, plan)
+
+    bot.send_message(user_id, "✅ Нашла перевод наконец! Вот твой доступ 🔥")
+
+    bot.send_message(user_id, DEMO_LINK)
 # ---------------- BACK ----------------
 @bot.callback_query_handler(func=lambda call: call.data == "back_to_tariffs")
 def back_to_tariffs(call):
