@@ -229,6 +229,16 @@ def give_sub(user_id, plan_key):
     )
 
 # ---------------- TARIFS ----------------
+markup = InlineKeyboardMarkup()
+
+markup.add(InlineKeyboardButton("💙 Basic / 1 DAY", callback_data="buy_basic"))
+markup.add(InlineKeyboardButton("💛 Middle / 1 WEEK", callback_data="buy_middle"))
+markup.add(InlineKeyboardButton("❤️ HOT / 1 MONTH", callback_data="buy_hot"))
+markup.add(InlineKeyboardButton("🔥 Ahhh... V.I.P. / 1 MONTH", callback_data="buy_ahhh"))
+markup.add(InlineKeyboardButton("📱 Меню", callback_data="menu"))
+
+text = "🌭 <b>Привет, зайчик...</b>"
+
 try:
     bot.edit_message_text(
         text,
@@ -238,21 +248,12 @@ try:
         parse_mode="HTML"
     )
 except:
-    pass
-
-    markup.add(InlineKeyboardButton("💙 Basic / 1 DAY", callback_data="buy_basic"))
-    markup.add(InlineKeyboardButton("💛 Middle / 1 WEEK", callback_data="buy_middle"))
-    markup.add(InlineKeyboardButton("❤️ HOT / 1 MONTH", callback_data="buy_hot"))
-    markup.add(InlineKeyboardButton("🔥 Ahhh... V.I.P. / 1 MONTH", callback_data="buy_ahhh"))
-    markup.add(InlineKeyboardButton("📱 Меню", callback_data="menu"))
-
-    text = "🌭 <b>Привет, зайчик\n\n Это мой бот для выдачи доступа к моим приваточкам! Все пополняются регулярно, контент прям из печи 🥵</b>\n <b>Hi sweetie, this is my private access bot</b>\n\n <i>Посмотри в меню разогревчик, чтобы понять что тебя ждет</i>\n <i>Выбери подходящий тариф / Choose a plan!</i>👇"
-
-    if message_id:
-        bot.edit_message_text(text, chat_id, message_id, reply_markup=markup, parse_mode="HTML")
-    else:
-        bot.send_message(chat_id, text, reply_markup=markup, parse_mode="HTML")
-
+    bot.send_message(
+        chat_id,
+        text,
+        reply_markup=markup,
+        parse_mode="HTML"
+    )
 # ---------------- BUY ----------------
 @bot.callback_query_handler(func=lambda call: call.data.startswith("buy_"))
 def buy(call):
