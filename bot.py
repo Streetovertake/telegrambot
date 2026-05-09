@@ -85,7 +85,7 @@ def show_plan(call, title, desc, price, plan_key):
 def buy_basic(call):
     show_plan(
         call,
-        "Basic / 1 день\n"
+        "Basic / 1 день",
         "🔹 Доступ на 24 часа в сладенький контент из подписки HOT❤️\n\n"
         "Красивые фоточки без цензуры!\n\n"
         "Короткие вертикальные видео БЕЗ ЦЕНЗУРЫ",
