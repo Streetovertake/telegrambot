@@ -29,7 +29,9 @@ PLANS = {
 @bot.message_handler(commands=['start'])
 def start(message):
     show_tariffs(message.chat.id)
-    bot.send_message(ADMIN_ID, "test")
+@bot.message_handler(commands=['test'])
+def test(message):
+    bot.send_message(message.chat.id, "OK")
 
 # ---------------- MENU ----------------
 @bot.callback_query_handler(func=lambda call: call.data == "menu")
