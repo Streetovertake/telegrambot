@@ -142,7 +142,6 @@ def buy_basic(call):
         600,
         "basic"
     )
-    )
     
 # ------------------middle--------------------
 @bot.callback_query_handler(func=lambda call: call.data == "buy_middle")
