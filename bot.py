@@ -6,7 +6,8 @@ import time
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 user_state = {}  # user_id: {"plan": "basic"}
 pending_payments = {}
-
+# ---------------- STORAGE ----------------
+subs = {}  # user_id: {expire, plan, warned}
 # ---------------- BOT INIT ----------------
 TOKEN = os.environ["TOKEN"]
 ADMIN_ID = int(os.environ["ADMIN_ID"])
@@ -15,9 +16,6 @@ USDT_WALLET = os.environ["USDT_WALLET"]
 DEMO_LINK = os.environ["DEMO_LINK"]
 # ---------------- BOT INIT ----------------
 bot = telebot.TeleBot(TOKEN)
-
-# ---------------- STORAGE ----------------
-subs = {}  # user_id: {expire, plan, warned}
 
 # ---------------- PLANS ----------------
 PLANS = {
