@@ -3,167 +3,141 @@ import os
 from datetime import datetime, timedelta
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 
-# ---------------- INIT ----------------
 TOKEN = os.environ["TOKEN"]
 ADMIN_ID = int(os.environ["ADMIN_ID"])
 USDT_WALLET = os.environ["USDT_WALLET"]
 
 bot = telebot.TeleBot(TOKEN)
 
-# ---------------- STORAGE ----------------
 subs = {}
-user_state = {}
 pending_payments = {}
 
-# ---------------- PLANS ----------------
 PLANS = {
     "basic": {"days": 1, "price": 600, "title": "Basic"},
     "middle": {"days": 7, "price": 1600, "title": "Middle"},
     "hot": {"days": 30, "price": 2500, "title": "HOT"},
     "ahhh": {"days": 30, "price": 4990, "title": "Ahhh"}
 }
+#___
 
-# ---------------- START ----------------
-@bot.message_handler(commands=['start'])
-def start(message):
-    show_tariffs(message.chat.id)
-
-# ---------------- TARIFS ----------------
-def show_tariffs(chat_id, message_id=None):
-
+def show_tariffs(chat_id):
     markup = InlineKeyboardMarkup()
-    markup.add(InlineKeyboardButton("💙 Basic", callback_data="buy_basic"))
-    markup.add(InlineKeyboardButton("💛 Middle", callback_data="buy_middle"))
-    markup.add(InlineKeyboardButton("❤️ HOT", callback_data="buy_hot"))
-    markup.add(InlineKeyboardButton("🔥 VIP", callback_data="buy_ahhh"))
 
-    text = "🌭 <b>Выбери тариф</b>"
+    for key, plan in PLANS.items():
+        markup.add(InlineKeyboardButton(
+            f"{plan['title']} / {plan['price']}₽",
+            callback_data=f"plan_{key}"
+        ))
 
-    if message_id:
-        bot.edit_message_text(text, chat_id, message_id, reply_markup=markup, parse_mode="HTML")
-    else:
-        bot.send_message(chat_id, text, reply_markup=markup, parse_mode="HTML")
+    bot.send_message(chat_id, "Выбери тариф", reply_markup=markup)
+    
+#___
 
-# ---------------- SHOW PLAN ----------------
-def show_plan(call, plan_key):
+@bot.callback_query_handler(func=lambda call: call.data.startswith("plan_"))
+def plan(call):
 
-    plan = PLANS[plan_key]
-    user_state[call.from_user.id] = plan_key
-
-    markup = InlineKeyboardMarkup()
-    markup.add(InlineKeyboardButton("💳 Карта", callback_data=f"pay_card_{plan_key}"))
-    markup.add(InlineKeyboardButton("🚀 Boosty", callback_data=f"pay_boosty_{plan_key}"))
-    markup.add(InlineKeyboardButton("💰 USDT", callback_data=f"pay_usdt_{plan_key}"))
-    markup.add(InlineKeyboardButton("⬅ Назад", callback_data="back"))
-
-    text = (
-        f"🔥 <b>{plan['title']}</b>\n\n"
-        f"💸 Цена: {plan['price']}₽\n\n"
-        f"Выбери оплату"
-    )
-
-    bot.edit_message_text(text, call.message.chat.id, call.message.message_id,
-                          reply_markup=markup, parse_mode="HTML")
-
-# ---------------- BUY ----------------
-@bot.callback_query_handler(func=lambda call: call.data.startswith("buy_"))
-def buy(call):
-
-    plan_key = call.data.replace("buy_", "")
+    plan_key = call.data.split("_")[1]
 
     if plan_key not in PLANS:
-        bot.send_message(call.message.chat.id, "Ошибка тарифа")
         return
 
-    show_plan(call, plan_key)
+    plan = PLANS[plan_key]
 
-# ---------------- PAY ----------------
-def pay_screen(call, method):
+    markup = InlineKeyboardMarkup()
+    markup.add(InlineKeyboardButton("USDT", callback_data=f"usdt_{plan_key}"))
+    markup.add(InlineKeyboardButton("Card", callback_data=f"card_{plan_key}"))
+    markup.add(InlineKeyboardButton("Boosty", callback_data=f"boosty_{plan_key}"))
 
-    plan = user_state.get(call.from_user.id)
+    bot.edit_message_text(
+        f"{plan['title']} — {plan['price']}₽",
+        call.message.chat.id,
+        call.message.message_id,
+        reply_markup=markup
+    )
 
+#___
+
+def pay(call, method, plan_key):
+
+    plan = PLANS.get(plan_key)
     if not plan:
-        bot.send_message(call.message.chat.id, "Ошибка: выбери тариф заново")
         return
 
     markup = InlineKeyboardMarkup()
-    markup.add(InlineKeyboardButton("⬅ Назад", callback_data=f"back_{plan}"))
-    markup.add(InlineKeyboardButton("✅ Я оплатил", callback_data="paid"))
+    markup.add(InlineKeyboardButton("Я оплатил", callback_data=f"paid_{plan_key}"))
 
     if method == "usdt":
-        text = f"💰 USDT:\n<code>{USDT_WALLET}</code>"
-
+        text = f"USDT: {USDT_WALLET}"
     elif method == "card":
-        text = "💳 Перевод на карту:\n<code>2202228406930000</code>"
-
+        text = "Card: 2202..."
     else:
-        text = "🚀 Boosty оплата"
+        text = "Boosty link"
 
-    bot.edit_message_text(text, call.message.chat.id, call.message.message_id,
-                          reply_markup=markup, parse_mode="HTML")
+    bot.edit_message_text(
+        text,
+        call.message.chat.id,
+        call.message.message_id,
+        reply_markup=markup
+    )
+    
+#___
 
-# ---------------- PAY HANDLERS ----------------
-@bot.callback_query_handler(func=lambda call: call.data.startswith("pay_usdt"))
-def pay_usdt(call):
-    pay_screen(call, "usdt")
+@bot.callback_query_handler(func=lambda call: call.data.startswith("usdt_"))
+def usdt(call):
+    plan_key = call.data.split("_")[1]
+    pay(call, "usdt", plan_key)
 
-@bot.callback_query_handler(func=lambda call: call.data.startswith("pay_card"))
-def pay_card(call):
-    pay_screen(call, "card")
+@bot.callback_query_handler(func=lambda call: call.data.startswith("card_"))
+def card(call):
+    plan_key = call.data.split("_")[1]
+    pay(call, "card", plan_key)
 
-@bot.callback_query_handler(func=lambda call: call.data.startswith("pay_boosty"))
-def pay_boosty(call):
-    pay_screen(call, "boosty")
+@bot.callback_query_handler(func=lambda call: call.data.startswith("boosty_"))
+def boosty(call):
+    plan_key = call.data.split("_")[1]
+    pay(call, "boosty", plan_key)
+    
+#___
 
-# ---------------- BACK ----------------
-@bot.callback_query_handler(func=lambda call: call.data.startswith("back_"))
-def back(call):
-
-    plan = call.data.replace("back_", "")
-
-    show_plan(call, plan)
-
-# ---------------- PAID ----------------
-@bot.callback_query_handler(func=lambda call: call.data == "paid")
+@bot.callback_query_handler(func=lambda call: call.data.startswith("paid_"))
 def paid(call):
 
     user_id = call.from_user.id
-    plan = user_state.get(user_id)
+    plan_key = call.data.split("_")[1]
 
-    if not plan:
-        bot.send_message(user_id, "Ошибка: нет тарифа")
-        return
+    pending_payments[user_id] = plan_key
 
-    pending_payments[user_id] = plan
+    markup = InlineKeyboardMarkup()
+    markup.add(InlineKeyboardButton("Confirm", callback_data=f"confirm_{user_id}"))
 
     bot.send_message(
         ADMIN_ID,
-        f"💰 ОПЛАТА\nUser: {user_id}\nPlan: {plan}\n\nНажми: /confirm_{user_id}"
+        f"PAYMENT\nUser: {user_id}\nPlan: {plan_key}",
+        reply_markup=markup
     )
 
-# ---------------- CONFIRM ----------------
-@bot.message_handler(func=lambda m: m.text and m.text.startswith("/confirm_"))
-def confirm(message):
+#___
 
-    if message.from_user.id != ADMIN_ID:
+@bot.callback_query_handler(func=lambda call: call.data.startswith("confirm_"))
+def confirm(call):
+
+    if call.from_user.id != ADMIN_ID:
         return
 
-    user_id = int(message.text.split("_")[1])
+    user_id = int(call.data.split("_")[1])
+    plan_key = pending_payments.get(user_id)
 
-    plan = pending_payments.get(user_id)
-
-    if not plan:
-        bot.send_message(ADMIN_ID, "Нет заявки")
+    if not plan_key:
         return
+
+    plan = PLANS[plan_key]
 
     subs[user_id] = {
-        "expire": datetime.now() + timedelta(days=PLANS[plan]["days"]),
-        "plan": plan
+        "expire": datetime.now() + timedelta(days=plan["days"]),
+        "plan": plan_key
     }
 
-    bot.send_message(user_id, "✅ Оплата подтверждена 🔥")
-
-    del pending_payments[user_id]
-
-# ---------------- RUN ----------------
-bot.infinity_polling()
+    bot.send_message(user_id, "Оплата подтверждена")
+    pending_payments.pop(user_id, None)
+    
+#___
