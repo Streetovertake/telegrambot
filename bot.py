@@ -173,7 +173,6 @@ def buy_hot(call):
         2500,
         "hot"
     )
-    )
 #-------------------Ass-----------------------
 @bot.callback_query_handler(func=lambda call: call.data == "buy_ahhh")
 def buy_ahhh(call):
