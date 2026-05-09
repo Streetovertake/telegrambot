@@ -80,47 +80,105 @@ def show_plan(call, title, desc, price, plan_key):
         reply_markup=markup
     )
     
+#-------------------show-plan-----------------
+def show_plan(call, title, desc, price, plan_key):
+
+    markup = InlineKeyboardMarkup()
+
+    markup.add(
+        InlineKeyboardButton(
+            "💳 Карта",
+            callback_data=f"pay_card_{plan_key}"
+        )
+    )
+
+    markup.add(
+        InlineKeyboardButton(
+            "🚀 Boosty",
+            callback_data=f"pay_boosty_{plan_key}"
+        )
+    )
+
+    markup.add(
+        InlineKeyboardButton(
+            "💰 USDT",
+            callback_data=f"pay_usdt_{plan_key}"
+        )
+    )
+
+    markup.add(
+        InlineKeyboardButton(
+            "⬅ Назад",
+            callback_data="back"
+        )
+    )
+
+    text = (
+        f"🔥 <b>{title}</b>\n\n"
+        f"{desc}\n\n"
+        f"💸 <b>Цена: {price}₽</b>\n\n"
+        f"<i>Выбери способ оплаты:</i>"
+    )
+
+    bot.edit_message_text(
+        text,
+        call.message.chat.id,
+        call.message.message_id,
+        parse_mode="HTML",
+        reply_markup=markup
+    )
 # ------------------basic---------------------
 @bot.callback_query_handler(func=lambda call: call.data == "buy_basic")
 def buy_basic(call):
+
     show_plan(
         call,
         "Basic / 1 день",
-        "❤️ Доступ на 24 часа в сладенький контент из подписки HOT❤️(но без чата)\n\n"
-        "❤️ Красивые фоточки без цензуры!\n\n"
-        "❤️ Короткие вертикальные видео БЕЗ ЦЕНЗУРЫ",
+        "❤️ <i>Доступ на 24 часа в сладенький контент из подписки HOT</i>❤️\n\n"
+        "❤️ <i>Красивые фотосессии в сочных косплеях</i>!\n\n"
+        "❤️ <i>Короткие вертикальные видео БЕЗ ЦЕНЗУРЫ</i>"
+        "😔 <i>Минусы: Без доступа к чатику</i>",
+
         600,
         "basic"
+    )
     )
     
 # ------------------middle--------------------
 @bot.callback_query_handler(func=lambda call: call.data == "buy_middle")
 def buy_middle(call):
+
     show_plan(
         call,
         "Middle / 1 неделя",
-        "❤️ Доступ на 1 неделю в сладенький контент из подписки HOT❤️(но без чата)\n\n"
-        "❤️ Красивые фоточки без цензуры!\n\n"
-        "❤️ Короткие вертикальные видео БЕЗ ЦЕНЗУРЫ",
+        "❤️ <i>Доступ на <b>7 дней</b> в сладенький контент из подписки HOT</i>❤️\n\n"
+        "❤️ <i>Красивые фотосессии в сочных косплеях</i>!\n\n"
+        "❤️ <i>Короткие вертикальные видео БЕЗ ЦЕНЗУРЫ</i>"
+        "😔 <i>Минусы: Без доступа к чатику</i>",
+
         1600,
         "middle"
     )
 # -------------------HOT---------------------
 @bot.callback_query_handler(func=lambda call: call.data == "buy_hot")
 def buy_hot(call):
+
     show_plan(
         call,
         "HOT / 1 месяц",
-        "❤️ Доступ на 1 месяц в сладенький контент из подписки HOT❤️\n\n"
-        "❤️ Красивые фоточки без цензуры!\n\n"
-        "❤️ Короткие вертикальные видео БЕЗ ЦЕНЗУРЫ\n\n"
+        "❤️ <i>Доступ на <b>30 дней</b> в сладенький контент из подписки HOT</i>❤️\n\n"
+        "❤️ <i>Красивые фотосессии в сочных косплеях</i>!\n\n"
+        "❤️ <i>Короткие вертикальные видео БЕЗ ЦЕНЗУРЫ</i>\n\n"
         "❤️ +Доступ в горяченный чат, в котором я общаюсь с вами!(<i>Псс... я даже кружочки скидываю туда</i>)",
-         2500,
+
+        2500,
         "hot"
+    )
     )
 #-------------------Ass-----------------------
 @bot.callback_query_handler(func=lambda call: call.data == "buy_ahhh")
 def buy_ahhh(call):
+
     show_plan(
         call,
         "Ahhh... VIP",
@@ -130,7 +188,8 @@ def buy_ahhh(call):
         "🔞Мои стоны, Кримпай, Крики и Слезы БЕЗ ЦЕНЗУРЫ!\n\n"
         "🔞Длинные видео по 10-15 минуток!\n\n"
         "🔞Возможность заказать кастомные видео/кружки/сигнушки!\n\n"
-        "🔞+Доступ к V.I.P чату, в котором общаюсь всегда!\n\n",
+        "🔞+Доступ к V.I.P чату, в котором общаюсь всегда!\n\n,
+
         4990,
         "ahhh"
     )
