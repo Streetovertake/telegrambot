@@ -25,10 +25,25 @@ def menu(call):
         reply_markup=markup,
         parse_mode="HTML"
     )
-
+---------------------------------------------
 @bot.message_handler(commands=['start'])
 def start(message):
     show_tariffs(message.chat.id)
+    
+    @bot.callback_query_handler(func=lambda call: call.data == "trial")
+def trial(call):
+    bot.answer_callback_query(call.id)
+
+    markup = InlineKeyboardMarkup()
+    markup.add(InlineKeyboardButton("🏠 Назад", callback_data="menu"))
+
+    bot.send_video(
+        call.message.chat.id,
+        TRIAL_VIDEO,
+        caption="🎥 <i>Пробное видео</i>\n\n<i>Это демо-контент</i>",
+        parse_mode="HTML",
+        reply_markup=markup
+    )
 
 # ---------------- TARIF MENU ----------------
 def show_tariffs(chat_id, message_id=None):
