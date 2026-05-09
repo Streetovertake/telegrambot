@@ -81,14 +81,6 @@ def trial(call):
         )
     )
 
-    bot.send_message(
-        call.message.chat.id,
-        "🎥 <b>Разогрев / Warmup</b>\n\n"
-        "<i>🔞 Нажми кнопку ниже</i>",
-        parse_mode="HTML",
-        reply_markup=markup
-    )
-
     bot.edit_message_text(
         "🎥 <b>Разогрев / Warmup</b>\n\n"
         "<i>🔞👇Нажми внизу и насладись 👇🔞</i>",
