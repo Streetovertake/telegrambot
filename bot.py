@@ -41,12 +41,12 @@ def menu(call):
     markup.add(InlineKeyboardButton("🏠 ВЫБОР ТАРИФА", callback_data="back"))
 
     bot.send_message(
-        call.message.chat.id,
-        "📱 <b>МЕНЮ НАВИГАЦИИ В БОТЕ</b>\n"
-        "<b><i>zazzy private</i></b>"
-        parse_mode="HTML",
-        reply_markup=markup
-    )
+    call.message.chat.id,
+    "📱 <b>МЕНЮ НАВИГАЦИИ В БОТЕ</b>\n"
+    "<b><i>zazzy private</i></b>",
+    parse_mode="HTML",
+    reply_markup=markup
+)
 
 # ---------------- GIVE SUB ----------------
 def give_sub(user_id, plan_key):
