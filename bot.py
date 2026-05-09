@@ -18,6 +18,11 @@ PLANS = {
     "hot": {"days": 30, "price": 2500, "title": "HOT"},
     "ahhh": {"days": 30, "price": 4990, "title": "Ahhh"}
 }
+
+@bot.message_handler(commands=['start'])
+def start(message):
+    show_tariffs(message.chat.id)
+    
 #___
 
 def show_tariffs(chat_id):
