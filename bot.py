@@ -286,17 +286,37 @@ def pay_usdt(call):
 
     markup = InlineKeyboardMarkup()
 
+    markup.add(InlineKeyboardButton("⬅ Назад", callback_data=f"back_plan_{plan}"))
     markup.add(InlineKeyboardButton("✅ Я оплатил", callback_data=f"paid_{plan}"))
-    markup.add(InlineKeyboardButton("⬅ Назад", callback_data=f"buy_{plan}"))
 
     bot.edit_message_text(
-        f"💰 USDT:\n<code>{USDT_WALLET}</code>\n\nПосле оплаты нажми кнопку ниже",
+        f"💰 USDT:\n<code>{USDT_WALLET}</code>",
         call.message.chat.id,
         call.message.message_id,
         parse_mode="HTML",
         reply_markup=markup
     )
 
+@bot.callback_query_handler(func=lambda call: call.data.startswith("back_plan_"))
+def back_plan(call):
+
+    plan = call.data.replace("back_plan_", "")
+
+    # возвращаем тот же экран тарифа
+    fake_call = type("obj", (), {
+        "message": call.message,
+        "from_user": call.from_user
+    })
+
+    if plan == "basic":
+        buy_basic(fake_call)
+    elif plan == "middle":
+        buy_middle(fake_call)
+    elif plan == "hot":
+        buy_hot(fake_call)
+    elif plan == "ahhh":
+        buy_ahhh(fake_call)
+        
 # ---------------- CARD ----------------
 @bot.callback_query_handler(func=lambda call: "pay_card" in call.data)
 def pay_card(call):
@@ -360,33 +380,30 @@ def paid(call):
     plan = call.data.replace("paid_", "")
     user_id = call.from_user.id
 
-    pending_payments[user_id] = plan
-
-    bot.send_message(
+    msg = bot.send_message(
         ADMIN_ID,
-        f"💰 Забашлял смотри!\n\nUser: {user_id}\nPlan: {plan}",
-        reply_markup=InlineKeyboardMarkup().add(
-            InlineKeyboardButton("✅ Подтвердить", callback_data=f"confirm_{user_id}")
-        )
+        f"💰 Забашлял лавешку, смотри!\nUser: {user_id}\nPlan: {plan}"
     )
+
+    pending_payments[msg.message_id] = (user_id, plan)
 
     bot.send_message(user_id, "⏳ Не торопись, я сама лапками все проверяю...")
     
 @bot.callback_query_handler(func=lambda call: call.data.startswith("confirm_"))
 def confirm(call):
 
-    user_id = int(call.data.replace("confirm_", ""))
-    plan = pending_payments.get(user_id)
+    msg_id = int(call.data.replace("confirm_", ""))
 
-    if not plan:
-        bot.answer_callback_query(call.id, "Не пришли денюжки😔")
+    if msg_id not in pending_payments:
+        bot.answer_callback_query(call.id, "Нет данных")
         return
+
+    user_id, plan = pending_payments[msg_id]
 
     give_sub(user_id, plan)
 
-    bot.send_message(user_id, "✅ Нашла перевод наконец! Вот твой доступ 🔥")
-
-    bot.send_message(user_id, DEMO_LINK)
+    bot.send_message(user_id, "✅ Нашла перевод наконец то! Добро пожаловать! 🔥")
+    
 # ---------------- BACK ----------------
 @bot.callback_query_handler(func=lambda call: call.data == "back_to_tariffs")
 def back_to_tariffs(call):
