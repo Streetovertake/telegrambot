@@ -16,8 +16,8 @@ def start(message):
 def show_tariffs(chat_id, message_id=None):
     markup = InlineKeyboardMarkup()
 
-    btn1 = InlineKeyboardButton("💎 Для маменькиных сыночков", callback_data="tariff_soft")
-    btn2 = InlineKeyboardButton("🔥 Для взрослых", callback_data="tariff_hard")
+    btn1 = InlineKeyboardButton("🫣 Для неувереных / HOT", callback_data="tariff_soft")
+    btn2 = InlineKeyboardButton("🥵 Для взрослых / PRO", callback_data="tariff_hard")
     menu_btn = InlineKeyboardButton("📱 Меню", callback_data="menu")
 
     markup.add(btn1)
@@ -25,9 +25,9 @@ def show_tariffs(chat_id, message_id=None):
     markup.add(menu_btn)
 
     text = (
-        "👁 Я знаю, зачем ты пришёл...\n"
-        "I know why you're here...\n\n"
-        "👇 Выбери тариф"
+        "🌭Я знаю, зачем ты пришёл...\n"
+        "🌭I know why you're here...\n\n"
+        "👇 Выбери тариф/Choose 👇"
     )
 
     if message_id:
@@ -41,9 +41,9 @@ def tariff_soft(call):
     markup = InlineKeyboardMarkup()
 
     btn_usdt = InlineKeyboardButton("💰 USDT", callback_data="pay_usdt_soft")
-    btn_card = InlineKeyboardButton("💳 Карта банка", callback_data="pay_card_soft")
+    btn_card = InlineKeyboardButton("💳 Карта банка (РФ)", callback_data="pay_card_soft")
     btn_boosty = InlineKeyboardButton("🚀 Boosty", callback_data="pay_boosty_soft")
-    back = InlineKeyboardButton("⬅ Назад", callback_data="back")
+    back = InlineKeyboardButton("⬅ Назад/Back", callback_data="back")
 
     markup.add(btn_usdt)
     markup.add(btn_card)
@@ -51,9 +51,14 @@ def tariff_soft(call):
     markup.add(back)
 
     text = (
-        "💎 Тариф: Для маменькиных сыночков\n\n"
-        "📌 Описание (вставишь сам)\n"
-        "💰 Цена: XX"
+        "Тариф: HOT 🫣\n\n"
+        "📌 Описание:\n"
+        "Фоточки без цензуры - видно всё🫣\n"
+        "Все фотосессии, их полные версии\n"
+        "Короткие видео ТикТок формата\n"
+        "Доступ в HOT чат, я часто в нем появляюсь\n"
+        "Регулярное пополнение контентом\n"
+        "💰 Цена: 2000₽"
     )
 
     bot.edit_message_text(text, call.message.chat.id, call.message.message_id, reply_markup=markup)
@@ -74,9 +79,15 @@ def tariff_hard(call):
     markup.add(back)
 
     text = (
-        "🔥 Тариф: Для взрослых\n\n"
-        "📌 Описание (вставишь сам)\n"
-        "💰 Цена: XX"
+        "Тариф: PRO 🥵\n\n"
+        "📌 Описание:\n"
+        "Самый полный тариф - ты увидишь ВСЁ\n"
+        "Никакой цензуры - все прелести крупным планом\n"
+        "Соло для взрослых продолжительностью 10 и ДАЖЕ 15 минут!\n"
+        "Большие игрушки, Окончания и Крики - как ты любишь\n"
+        "Регулярное пополнение контента\n"
+        "Доступ в PRO чат, в котором я постоянно общаюсь\n\n"
+        "💰 Цена: 5000₽"
     )
 
     bot.edit_message_text(text, call.message.chat.id, call.message.message_id, reply_markup=markup)
@@ -119,8 +130,8 @@ def pay_boosty(call):
 @bot.message_handler(commands=['paid'])
 def paid(message):
     bot.send_message(message.chat.id,
-        "✔ Оплата принята (проверка вручную)\n\n"
-        "👉 Доступ выдан (вставишь ссылки на приватки)"
+        "✔ Оплата принята в обработку...\n\n"
+        "✌️Оплату проверяю вручную, не злись, зайка, если задержусь, доступ выдам сразу как проверю❤️""
     )
 
 # ---------------- MENU ----------------
