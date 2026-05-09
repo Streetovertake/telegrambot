@@ -315,3 +315,4 @@ def back(call):
     
 # ---------------- RUN ----------------
 bot.infinity_polling()
+threading.Thread(target=check_subs, daemon=True).start()
