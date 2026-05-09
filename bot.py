@@ -168,5 +168,10 @@ def paid(message):
 def back(call):
     show_tariffs(call.message.chat.id, call.message.message_id)
 
+@bot.message_handler(content_types=['video'])
+def get_video(message):
+    print(message.video.file_id)
+    bot.send_message(message.chat.id, message.video.file_id)
+    
 # ---------------- RUN ----------------
 bot.infinity_polling()
