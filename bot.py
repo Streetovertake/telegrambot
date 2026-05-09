@@ -7,13 +7,12 @@ from dotenv import load_dotenv
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 # ---------------- LOAD ENV ----------------
-load_dotenv()
+import os
 
-TOKEN = os.getenv("TOKEN")
-ADMIN_ID = int(os.getenv("ADMIN_ID"))
-CHANNEL_ID = os.getenv("CHANNEL_ID")
-USDT_WALLET = os.getenv("USDT_WALLET")
-DEMO_LINK = os.getenv("DEMO_LINK")
+TOKEN = os.environ["TOKEN"]
+ADMIN_ID = int(os.environ["ADMIN_ID"])
+CHANNEL_ID = os.environ["CHANNEL_ID"]
+USDT_WALLET = os.environ["USDT_WALLET"]
 
 # ---------------- BOT INIT ----------------
 bot = telebot.TeleBot(TOKEN)
