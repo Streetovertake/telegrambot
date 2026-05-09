@@ -69,7 +69,7 @@ def trial(call):
 
     markup.add(
         InlineKeyboardButton(
-            "🎥 🔞Надень наушники🔞",
+            "🎥 🔞 Надень наушники",
             url=DEMO_LINK
         )
     )
@@ -83,8 +83,8 @@ def trial(call):
 
     bot.send_message(
         call.message.chat.id,
-        "🎥 <b>Пробный контент</b>\n\n"
-        "<i>Нажми кнопку ниже чтобы открыть demo канал</i>",
+        "🎥 <b>Разогрев / Warmup</b>\n\n"
+        "<i>🔞 Нажми кнопку ниже</i>",
         parse_mode="HTML",
         reply_markup=markup
     )
