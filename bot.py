@@ -141,3 +141,10 @@ def confirm(call):
     pending_payments.pop(user_id, None)
     
 #___
+if __name__ == "__main__":
+    print("🚀 BOT IS STARTING...")
+
+    try:
+        bot.infinity_polling(skip_pending=True)
+    except Exception as e:
+        print("❌ BOT CRASHED:", e)
