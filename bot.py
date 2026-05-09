@@ -260,7 +260,7 @@ def show_tariffs(chat_id, message_id=None):
 @bot.callback_query_handler(func=lambda call: call.data.startswith("buy_"))
 def buy(call):
     user_id = call.from_user.id
-    plan = call.data.replace("buy_", "")
+    plan = call.data.replace("buy_", "", 1)
 
     give_sub(user_id, plan)
 
