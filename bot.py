@@ -128,7 +128,6 @@ def show_plan(call, title, desc, price, plan_key):
     markup.add(
     InlineKeyboardButton("⬅ Назад", callback_data="back_to_tariffs")
 )
-        )
     )
 
     text = (
