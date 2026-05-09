@@ -25,7 +25,7 @@ def menu(call):
         reply_markup=markup,
         parse_mode="HTML"
     )
----------------------------------------------
+#--------------------------------------------
 @bot.message_handler(commands=['start'])
 def start(message):
     show_tariffs(message.chat.id)
