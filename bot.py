@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 import threading
 import time
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
+user_state = {}  # user_id: {"plan": "basic"}
 
 # ---------------- BOT INIT ----------------
 TOKEN = os.environ["TOKEN"]
@@ -72,26 +73,22 @@ def menu(call):
 
 #-------------------plan oplata---------------
 def show_plan(call, title, desc, price, plan_key):
+
+    user_state[call.from_user.id] = {"plan": plan_key}
+
     markup = InlineKeyboardMarkup()
 
-    markup.add(
-        InlineKeyboardButton("💰 USDT", callback_data=f"pay_usdt_{plan_key}")
-    )
-    markup.add(
-        InlineKeyboardButton("💳 Карта", callback_data=f"pay_card_{plan_key}")
-    )
-    markup.add(
-        InlineKeyboardButton("🚀 Boosty", callback_data=f"pay_boosty_{plan_key}")
-    )
-    markup.add(
-        InlineKeyboardButton("⬅ Назад", callback_data="back")
-    )
+    markup.add(InlineKeyboardButton("💳 Банковская карта. Перевод.", callback_data=f"pay_card_{plan_key}"))
+    markup.add(InlineKeyboardButton("🚀 СБП, Картой через Boosty ", callback_data=f"pay_boosty_{plan_key}"))
+    markup.add(InlineKeyboardButton("💰 USDT (TRC20)", callback_data=f"pay_usdt_{plan_key}"))
+
+    markup.add(InlineKeyboardButton("⬅ Назад", callback_data="back_to_tariffs"))
 
     text = (
         f"🔥 <b>{title}</b>\n\n"
         f"{desc}\n\n"
-        f"💰 <b>Цена: {price}₽</b>\n\n"
-        f"👇 <i>Выбери способ оплаты</i>"
+        f"💸 <b>Цена: {price}₽</b>\n\n"
+        f"<i>Выбери способ оплаты</i>"
     )
 
     bot.edit_message_text(
@@ -353,14 +350,9 @@ def check_subs():
         time.sleep(60)
 
 # ---------------- BACK ----------------
-@bot.callback_query_handler(func=lambda call: call.data == "back")
-def back(call):
-    bot.answer_callback_query(call.id)
-
-    show_tariffs(
-        call.message.chat.id,
-        call.message.message_id
-    )
+@bot.callback_query_handler(func=lambda call: call.data == "back_to_tariffs")
+def back_to_tariffs(call):
+    show_tariffs(call.message.chat.id, call.message.message_id)
 
 # ---------------- RUN ----------------
 threading.Thread(target=check_subs, daemon=True).start()
