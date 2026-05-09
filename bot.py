@@ -1,5 +1,37 @@
 import telebot
 import os
+from datetime import datetime, timedelta
+import threading
+import time
+
+ADMIN_ID = 123456789  # <-- поставь свой Telegram ID
+
+CHANNEL_ID = "@your_private_channel"
+
+subs = {}  # user_id: {expire, plan, warned}
+
+PLANS = {
+    "basic": {
+        "days": 1,
+        "price": 600,
+        "title": "Basic"
+    },
+    "middle": {
+        "days": 7,
+        "price": 1600,
+        "title": "Middle"
+    },
+    "hot": {
+        "days": 30,
+        "price": 2500,
+        "title": "HOT"
+    },
+    "ahhh": {
+        "days": 30,
+        "price": 4990,
+        "title": "Ahhh..."
+    }
+}
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 TOKEN = os.getenv("TOKEN")
@@ -36,13 +68,33 @@ def menu(call):
         reply_markup=markup
     )
 
+#--------------------give----------------------
+def give_sub(user_id, plan_key):
+    plan = PLANS[plan_key]
+
+    subs[user_id] = {
+        "expire": datetime.now() + timedelta(days=plan["days"]),
+        "plan": plan_key,
+        "warned": False
+    }
+
+    # уведомление тебе
+    bot.send_message(
+        ADMIN_ID,
+        f"💰 Новая подписка!\n\n"
+        f"User: {user_id}\n"
+        f"Plan: {plan['title']}\n"
+        f"Days: {plan['days']}"
+    )
 
 # ---------------- TARIF MENU ----------------
 def show_tariffs(chat_id, message_id=None):
     markup = InlineKeyboardMarkup()
 
-    btn1 = InlineKeyboardButton("🫣 Для неуверенных / HOT", callback_data="tariff_soft")
-    btn2 = InlineKeyboardButton("🥵 Для взрослых / PRO", callback_data="tariff_hard")
+    InlineKeyboardButton("💙 Basic 600₽", callback_data="buy_basic")
+    InlineKeyboardButton("💛 Middle 1600₽", callback_data="buy_middle")
+    InlineKeyboardButton("❤️ HOT 2500₽", callback_data="buy_hot")
+    InlineKeyboardButton("🔥 Ahhh 4990₽", callback_data="buy_ahhh")
     menu_btn = InlineKeyboardButton("📱 Меню", callback_data="menu")
 
     markup.add(btn1)
@@ -115,6 +167,7 @@ def tariff_soft(call):
 
     bot.edit_message_text(text, call.message.chat.id, call.message.message_id,
                           reply_markup=markup, parse_mode="HTML")
+                        
 
 # ---------------- PRO ----------------
 @bot.callback_query_handler(func=lambda call: call.data == "tariff_hard")
@@ -158,6 +211,18 @@ def pay_usdt(call):
 
     bot.edit_message_text(text, call.message.chat.id, call.message.message_id,
                           reply_markup=markup, parse_mode="HTML")
+    @bot.callback_query_handler(func=lambda call: call.data.startswith("buy_"))
+    
+def buy(call):
+    user_id = call.from_user.id
+    plan = call.data.replace("buy_", "")
+
+    give_sub(user_id, plan)
+
+    bot.send_message(
+        user_id,
+        f"✔ {PLANS[plan]['title']} активирован 🔥"
+    )
 
 # ---------------- CARD ----------------
 @bot.callback_query_handler(func=lambda call: "pay_card" in call.data)
@@ -199,6 +264,39 @@ def paid(message):
         "<i>Я лично сама проверяю денюжки. Если долго не добавляю, не злись зайка, скоро добавлю.</i>",
         parse_mode="HTML"
     )
+
+#------------------check----------------
+def check_subs():
+    while True:
+        now = datetime.now()
+
+        for user_id in list(subs.keys()):
+            data = subs[user_id]
+
+            # ❌ истёк срок → удаляем
+            if data["expire"] < now:
+                try:
+                    bot.kick_chat_member(CHANNEL_ID, user_id)
+                    bot.unban_chat_member(CHANNEL_ID, user_id)
+                except:
+                    pass
+
+                del subs[user_id]
+                continue
+
+            # ⚠️ предупреждение за 24 часа
+            if not data["warned"]:
+                if (data["expire"] - now).total_seconds() < 86400:
+                    try:
+                        bot.send_message(
+                            user_id,
+                            "⚠️ Подписка скоро закончится!"
+                        )
+                        data["warned"] = True
+                    except:
+                        pass
+
+        time.sleep(60)
 
 # ---------------- BACK ----------------
 @bot.callback_query_handler(func=lambda call: call.data == "back")
