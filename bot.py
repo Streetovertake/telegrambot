@@ -77,18 +77,6 @@ def pay(call):
     )
 
 # ---------------- PAID (пока вручную) ----------------
-@bot.message_handler(commands=['paid'])
-def paid(message):
-    markup = InlineKeyboardMarkup()
-
-    markup.add(InlineKeyboardButton("📌 Приватка 1", url=PRIVATE_1))
-    markup.add(InlineKeyboardButton("📌 Приватка 2", url=PRIVATE_2))
-
-    bot.send_message(message.chat.id,
-        "✔ Если оплата прошла — вот доступ:",
-        reply_markup=markup
-    )
-# -----------------------------------------------------
 @bot.callback_query_handler(func=lambda call: call.data == "paid")
 def paid(call):
     markup = InlineKeyboardMarkup()
