@@ -4,7 +4,7 @@ from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 TOKEN = os.getenv("TOKEN")
 bot = telebot.TeleBot(TOKEN)
-trial = "BAACAgIAAxkBAAPCaf9DaCB7kwuocGIH8zyWNb9hpqoAAruWAAJEdPhLDN9OG5h42Kk7BA"
+TRIAL_VIDEO = "BAACAgIAAxkBAAPCaf9DaCB7kwuocGIH8zyWNb9hpqoAAruWAAJEdPhLDN9OG5h42Kk7BA"
 USDT_WALLET = "ТВОЙ_USDT_АДРЕС"
 
 # ---------------- START ----------------
@@ -35,7 +35,8 @@ def trial(call):
 
     bot.send_video(
         call.message.chat.id,
-        "🎥 <i>Пробное видео</i>\n\n<i>Демо-контент</i>",
+        TRIAL_VIDEO,
+        caption="🎥 <b>Пробное видео</b>\n\n<i>Демо-контент</i>",
         parse_mode="HTML",
         reply_markup=markup
     )
