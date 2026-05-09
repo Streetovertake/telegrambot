@@ -180,12 +180,17 @@ def paid(message):
 # ---------------- BACK ----------------
 @bot.callback_query_handler(func=lambda call: call.data == "back")
 def back(call):
-    show_tariffs(call.message.chat.id, call.message.message_id)
+    bot.answer_callback_query(call.id)
 
-@bot.message_handler(content_types=['video'])
-def get_video(message):
-    print(message.video.file_id)
-    bot.send_message(message.chat.id, message.video.file_id)
+    try:
+        bot.delete_message(
+            call.message.chat.id,
+            call.message.message_id
+        )
+    except:
+        pass
+
+    show_tariffs(call.message.chat.id)
     
 # ---------------- RUN ----------------
 bot.infinity_polling()
