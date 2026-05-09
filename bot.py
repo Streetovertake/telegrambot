@@ -12,11 +12,11 @@ USDT_WALLET = "ТВОЙ_USDT_АДРЕС"
 def start(message):
     show_tariffs(message.chat.id)
 
-# ---------------- MAIN MENU ----------------
+# ---------------- TARIF MENU ----------------
 def show_tariffs(chat_id, message_id=None):
     markup = InlineKeyboardMarkup()
 
-    btn1 = InlineKeyboardButton("🫣 Для неувереных / HOT", callback_data="tariff_soft")
+    btn1 = InlineKeyboardButton("🫣 Для неуверенных / HOT", callback_data="tariff_soft")
     btn2 = InlineKeyboardButton("🥵 Для взрослых / PRO", callback_data="tariff_hard")
     menu_btn = InlineKeyboardButton("📱 Меню", callback_data="menu")
 
@@ -25,139 +25,124 @@ def show_tariffs(chat_id, message_id=None):
     markup.add(menu_btn)
 
     text = (
-        "🌭Я знаю, зачем ты пришёл...\n"
-        "🌭I know why you're here...\n\n"
-        "👇 Выбери тариф / Choose 👇"
+        "👁 <b>Я знаю, зачем ты пришёл…</b>\n"
+        "<i>I know why you're here…</i>\n\n"
+        "👇 <i>Выбери тариф / Choose your access level</i>"
     )
 
     if message_id:
-        bot.edit_message_text(text, chat_id, message_id, reply_markup=markup)
+        bot.edit_message_text(text, chat_id, message_id, reply_markup=markup, parse_mode="HTML")
     else:
-        bot.send_message(chat_id, text, reply_markup=markup)
+        bot.send_message(chat_id, text, reply_markup=markup, parse_mode="HTML")
 
-# ---------------- TARIFF SOFT ----------------
+# ---------------- HOT ----------------
 @bot.callback_query_handler(func=lambda call: call.data == "tariff_soft")
 def tariff_soft(call):
     markup = InlineKeyboardMarkup()
 
-    btn_usdt = InlineKeyboardButton("💰 USDT", callback_data="pay_usdt_soft")
-    btn_card = InlineKeyboardButton("💳 Карта банка (РФ)", callback_data="pay_card_soft")
-    btn_boosty = InlineKeyboardButton("🚀 Boosty", callback_data="pay_boosty_soft")
-    back = InlineKeyboardButton("⬅ Назад/Back", callback_data="back")
-
-    markup.add(btn_usdt)
-    markup.add(btn_card)
-    markup.add(btn_boosty)
-    markup.add(back)
+    markup.add(InlineKeyboardButton("💰 USDT", callback_data="pay_usdt_soft"))
+    markup.add(InlineKeyboardButton("💳 Карта банка", callback_data="pay_card_soft"))
+    markup.add(InlineKeyboardButton("🚀 Boosty", callback_data="pay_boosty_soft"))
+    markup.add(InlineKeyboardButton("⬅ Назад", callback_data="back"))
 
     text = (
-        "Тариф: HOT 🫣\n\n"
-        "📌 Описание:\n"
-        "Фоточки без цензуры - видно всё🫣\n\n"
-        "Все фотосессии, их полные версии.\n\n"
-        "Короткие видео ТикТок формата.\n\n"
-        "Доступ в HOT чат, я часто в нем появляюсь.\n\n"
-        "Регулярное пополнение контентом.\n\n\n"
-        "💰 Цена: 2000₽"
+        "🫣 <b>Тариф: HOT</b>\n\n"
+
+        "📌 <i>Описание:</i>\n"
+        "• Фотосессии без цензуры\n"
+        "• Полные версии материалов\n"
+        "• Короткие видео формата TikTok\n"
+        "• Доступ в закрытый чат\n"
+        "• Регулярное обновление контента\n\n"
+
+        "💰 <b>Цена: 2000₽</b>"
     )
 
-    bot.edit_message_text(text, call.message.chat.id, call.message.message_id, reply_markup=markup)
+    bot.edit_message_text(text, call.message.chat.id, call.message.message_id,
+                          reply_markup=markup, parse_mode="HTML")
 
-# ---------------- TARIFF HARD ----------------
+# ---------------- PRO ----------------
 @bot.callback_query_handler(func=lambda call: call.data == "tariff_hard")
 def tariff_hard(call):
     markup = InlineKeyboardMarkup()
 
-    btn_usdt = InlineKeyboardButton("💰 USDT", callback_data="pay_usdt_hard")
-    btn_card = InlineKeyboardButton("💳 Карта банка", callback_data="pay_card_hard")
-    btn_boosty = InlineKeyboardButton("🚀 Boosty", callback_data="pay_boosty_hard")
-    back = InlineKeyboardButton("⬅ Назад", callback_data="back")
-
-    markup.add(btn_usdt)
-    markup.add(btn_card)
-    markup.add(btn_boosty)
-    markup.add(back)
+    markup.add(InlineKeyboardButton("💰 USDT", callback_data="pay_usdt_hard"))
+    markup.add(InlineKeyboardButton("💳 Карта банка", callback_data="pay_card_hard"))
+    markup.add(InlineKeyboardButton("🚀 Boosty", callback_data="pay_boosty_hard"))
+    markup.add(InlineKeyboardButton("⬅ Назад", callback_data="back"))
 
     text = (
-        "Тариф: PRO 🥵\n\n"
-        "📌 Описание:\n"
-        "Самый полный тариф - ты увидишь ВСЁ!\n\n"
-        "Никакой цензуры - все прелести крупным планом.\n\n"
-        "Соло для взрослых продолжительностью 10 и ДАЖЕ 15 минут!\n\n"
-        "Большие игрушки, Окончания и Крики - как ты любишь.\n\n"
-        "Регулярное пополнение контента.\n\n"
-        "Доступ в PRO чат, в котором я постоянно общаюсь.\n\n"
-        "Возможность заказать кастомное видео/Кружок/Сигну.\n\n"
-        "💰 Цена: 5000₽"
+        "🥵 <b>Тариф: PRO</b>\n\n"
+
+        "📌 <i>Описание:</i>\n"
+        "• Максимальный доступ к контенту\n"
+        "• Полная версия всех материалов\n"
+        "• Эксклюзивные видео 10–15 минут\n"
+        "• Закрытый PRO чат\n"
+        "• Возможность кастомных запросов\n\n"
+
+        "💰 <b>Цена: 5000₽</b>"
     )
 
-    bot.edit_message_text(text, call.message.chat.id, call.message.message_id, reply_markup=markup)
+    bot.edit_message_text(text, call.message.chat.id, call.message.message_id,
+                          reply_markup=markup, parse_mode="HTML")
 
-# ---------------- PAY USDT ----------------
+# ---------------- USDT PAYMENT ----------------
 @bot.callback_query_handler(func=lambda call: "pay_usdt" in call.data)
 def pay_usdt(call):
     markup = InlineKeyboardMarkup()
-    back = InlineKeyboardButton("⬅ Назад", callback_data="back")
+    markup.add(InlineKeyboardButton("⬅ Назад", callback_data="back"))
 
-    markup.add(back)
-
-    bot.send_message(call.message.chat.id,
-        f"💰 Оплата USDT (TRC20)\n\n"
-        f"📥 Адрес:\n`{USDT_WALLET}`\n\n"
-        f"После оплаты нажми /paid",
-        parse_mode="Markdown",
-        reply_markup=markup
+    text = (
+        "💰 <b>Оплата USDT (TRC20)</b>\n\n"
+        "📥 <i>Отправь средства на адрес:</i>\n"
+        f"<code>{USDT_WALLET}</code>\n\n"
+        "⚠️ <i>После оплаты нажми подтверждение</i>"
     )
 
-# ---------------- PAY CARD ----------------
+    bot.edit_message_text(text, call.message.chat.id, call.message.message_id,
+                          reply_markup=markup, parse_mode="HTML")
+
+# ---------------- CARD ----------------
 @bot.callback_query_handler(func=lambda call: "pay_card" in call.data)
 def pay_card(call):
-    bot.send_message(call.message.chat.id,
-        "💳 Оплата картой\n\n"
-        "👉 Вставишь сюда реквизиты\n"
-        "После оплаты нажми /paid"
+    markup = InlineKeyboardMarkup()
+    markup.add(InlineKeyboardButton("⬅ Назад", callback_data="back"))
+
+    text = (
+        "💳 <b>Оплата картой</b>\n\n"
+        "📌 <i>Реквизиты:</i>\n"
+        "<code>ВСТАВЬ СЮДА РЕКВИЗИТЫ</code>\n\n"
+        "⚠️ <i>После оплаты нажми /paid</i>"
     )
+
+    bot.edit_message_text(text, call.message.chat.id, call.message.message_id,
+                          reply_markup=markup, parse_mode="HTML")
 
 # ---------------- BOOSTY ----------------
 @bot.callback_query_handler(func=lambda call: "pay_boosty" in call.data)
 def pay_boosty(call):
-    bot.send_message(call.message.chat.id,
-        "🚀 Оплата через Boosty\n\n"
-        "👉 Вставишь ссылку на Boosty подписку\n"
-        "После оплаты нажми /paid"
+    markup = InlineKeyboardMarkup()
+    markup.add(InlineKeyboardButton("⬅ Назад", callback_data="back"))
+
+    text = (
+        "🚀 <b>Boosty подписка</b>\n\n"
+        "📌 <i>Оформи подписку по ссылке:</i>\n"
+        "<code>ВСТАВЬ ССЫЛКУ</code>\n\n"
+        "⚠️ <i>После оплаты нажми /paid</i>"
     )
 
-# ---------------- PAID (пока ручная выдача) ----------------
+    bot.edit_message_text(text, call.message.chat.id, call.message.message_id,
+                          reply_markup=markup, parse_mode="HTML")
+
+# ---------------- PAID ----------------
 @bot.message_handler(commands=['paid'])
 def paid(message):
     bot.send_message(message.chat.id,
-        "✔ Оплата принята в обработку...\n\n"
-        "Оплату проверяю вручную, не злись, зайка, если задержусь, доступ выдам сразу как проверю\n"
+        "✔ <b>Оплата принята в обработку</b>\n\n"
+        "<i>Проверяю вручную. Доступ будет выдан после подтверждения.</i>",
+        parse_mode="HTML"
     )
-
-# ---------------- MENU ----------------
-@bot.callback_query_handler(func=lambda call: call.data == "menu")
-def menu(call):
-    markup = InlineKeyboardMarkup()
-
-    btn1 = InlineKeyboardButton("📊 Проверить подписку", callback_data="check")
-    btn2 = InlineKeyboardButton("🎥 Пробное видео", callback_data="trial")
-    btn3 = InlineKeyboardButton("🏠 Тарифы", callback_data="back")
-
-    markup.add(btn1)
-    markup.add(btn2)
-    markup.add(btn3)
-
-    bot.edit_message_text("📱 Меню:", call.message.chat.id, call.message.message_id, reply_markup=markup)
-
-# ---------------- CHECK / TRIAL ----------------
-@bot.callback_query_handler(func=lambda call: call.data == "check")
-def check(call):
-    bot.send_message(call.message.chat.id, "⏳ Тут будет проверка подписки")
-
-@bot.callback_query_handler(func=lambda call: call.data == "trial")
-def trial(call):
-    bot.send_message(call.message.chat.id, "🎥 Тут будет пробное видео")
 
 # ---------------- BACK ----------------
 @bot.callback_query_handler(func=lambda call: call.data == "back")
