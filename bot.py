@@ -4,7 +4,7 @@ from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 TOKEN = os.getenv("TOKEN")
 bot = telebot.TeleBot(TOKEN)
-
+trial = "BAACAgIAAxkBAAPCaf9DaCB7kwuocGIH8zyWNb9hpqoAAruWAAJEdPhLDN9OG5h42Kk7BA"
 USDT_WALLET = "ТВОЙ_USDT_АДРЕС"
 
 # ---------------- START ----------------
