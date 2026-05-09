@@ -175,7 +175,7 @@ def back(call):
     
 @bot.message_handler(content_types=['text'])
 def test(message):
-    print(message.forward_from_chat.id)
+    print(message.chat.id)
 
 # ---------------- RUN ----------------
 threading.Thread(target=check_subs, daemon=True).start()
