@@ -213,28 +213,28 @@ def paid(call):
 
 # ---------- ADMIN MARKUP ----------
 
-admin_markup = InlineKeyboardMarkup()
+    admin_markup = InlineKeyboardMarkup()
 
-admin_markup.add(
-    InlineKeyboardButton(
-        "✅ Подтвердить",
-        callback_data=f"confirm_{user_id}"
+    admin_markup.add(
+        InlineKeyboardButton(
+            "✅ Подтвердить",
+            callback_data=f"confirm_{user_id}"
     )
 )
 
 
-markup.add(
-    InlineKeyboardButton(
-        "📱 В меню",
-        callback_data="menu"
+    markup.add(
+        InlineKeyboardButton(
+            "📱 В меню",
+            callback_data="menu"
     )
 )
 
-safe_edit(
-    call,
-    "⏳ Платеж отправлен\n\nОжидай подтверждения администратора",
-    markup
-    )
+    safe_edit(
+        call,
+        "⏳ Платеж отправлен\n\nОжидай подтверждения администратора",
+        markup
+        )
 
 bot.send_message(
     ADMIN_ID,
