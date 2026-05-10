@@ -90,6 +90,18 @@ def show_tariffs(chat_id, message_id=None, user_id=None):
             bot.send_message(chat_id, text, reply_markup=markup, parse_mode="HTML")
     except:
         pass
+        
+#----- 
+@bot.callback_query_handler(func=lambda call: call.data == "tariffs")
+def tariffs(call):
+
+    push(call.from_user.id, "menu")
+
+    show_tariffs(
+        call.message.chat.id,
+        call.message.message_id,
+        call.from_user.id
+    )
 
 # ---------------- PLAN OPEN ----------------
 @bot.callback_query_handler(func=lambda call: call.data.startswith("plan_"))
@@ -263,6 +275,35 @@ def trial(call):
         "🎥 Тестовое видео (сюда вставишь ссылку/канал)",
         markup
     )
+    
+#_____
+@bot.callback_query_handler(func=lambda call: call.data == "check")
+def check(call):
+
+    user_id = call.from_user.id
+
+    sub = subs.get(user_id)
+
+    markup = InlineKeyboardMarkup()
+    markup.add(InlineKeyboardButton("⬅ Назад", callback_data="back"))
+
+    if not sub:
+
+        text = "❌ Активной подписки нет"
+
+    else:
+
+        expire = sub["expire"]
+        left = expire - datetime.now()
+
+        days = left.days
+
+        text = (
+            f"✅ Подписка: {sub['plan']}\n"
+            f"⏳ Осталось дней: {days}"
+        )
+
+    safe_edit(call, text, markup)
 
 # ---------------- RUN ----------------
 print("BOT STARTED")
