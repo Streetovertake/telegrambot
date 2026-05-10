@@ -553,3 +553,4 @@ threading.Thread(target=background_worker, daemon=True).start()
 
 print("BOT STARTED")
 bot.infinity_polling(skip_pending=True)
+ENDOFFILE
