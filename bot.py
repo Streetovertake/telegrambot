@@ -167,22 +167,20 @@ def boosty(call):
     pay(call, "boosty", call.data.split("_")[1])
 
 # ---------------- PAID ----------------
-@bot.callback_query_handler(func=lambda call: call.data == "paid")
-def paid(call):
+markup = InlineKeyboardMarkup()
 
-    user_id = call.from_user.id
-    plan = user_state.get(user_id)
-
-    if not plan:
-        bot.send_message(user_id, "Ошибка")
-        return
-
-    pending_payments[user_id] = plan
-
-    bot.send_message(
-        ADMIN_ID,
-        f"💰 ОПЛАТА\nUser: {user_id}\nPlan: {plan}"
+markup.add(
+    InlineKeyboardButton(
+        "✅ Confirm",
+        callback_data=f"confirm_{user_id}"
     )
+)
+
+bot.send_message(
+    ADMIN_ID,
+    f"💰 ОПЛАТА\nUser: {user_id}\nPlan: {plan}",
+    reply_markup=markup
+)
 
 # ---------------- BACK ----------------
 @bot.callback_query_handler(func=lambda call: call.data == "back")
@@ -268,15 +266,67 @@ def back(call):
 @bot.callback_query_handler(func=lambda call: call.data == "trial")
 def trial(call):
 
+    push(call.from_user.id, "menu")
+
     markup = InlineKeyboardMarkup()
     markup.add(InlineKeyboardButton("⬅ Назад", callback_data="back"))
 
-    safe_edit(call,
+    safe_edit(
+        call,
         "🎥 Тестовое видео (сюда вставишь ссылку/канал)",
         markup
     )
     
-#_____
+#_____Confirm
+# ---------------- CONFIRM ----------------
+@bot.callback_query_handler(func=lambda call: call.data.startswith("confirm_"))
+def confirm(call):
+
+    if call.from_user.id != ADMIN_ID:
+        return
+
+    user_id = int(call.data.split("_")[1])
+
+    plan_key = pending_payments.get(user_id)
+
+    if not plan_key:
+        return
+
+    plan = PLANS[plan_key]
+
+    now = datetime.now()
+
+    # если подписка уже есть — продлеваем
+    if user_id in subs and subs[user_id]["expire"] > now:
+
+        new_expire = subs[user_id]["expire"] + timedelta(
+            days=plan["days"]
+        )
+
+    else:
+
+        new_expire = now + timedelta(
+            days=plan["days"]
+        )
+
+    subs[user_id] = {
+        "expire": new_expire,
+        "plan": plan_key
+    }
+
+    bot.send_message(
+        user_id,
+        "✅ Оплата подтверждена"
+    )
+
+    bot.send_message(
+        ADMIN_ID,
+        f"Выдан план {plan_key}"
+    )
+
+    pending_payments.pop(user_id, None)
+
+#____
 @bot.callback_query_handler(func=lambda call: call.data == "check")
 def check(call):
 
