@@ -167,20 +167,37 @@ def boosty(call):
     pay(call, "boosty", call.data.split("_")[1])
 
 # ---------------- PAID ----------------
-markup = InlineKeyboardMarkup()
+@bot.callback_query_handler(func=lambda call: call.data == "paid")
+def paid(call):
 
-markup.add(
-    InlineKeyboardButton(
-        "✅ Confirm",
-        callback_data=f"confirm_{user_id}"
+    user_id = call.from_user.id
+    plan = user_state.get(user_id)
+
+    if not plan:
+        bot.send_message(user_id, "Ошибка")
+        return
+
+    pending_payments[user_id] = plan
+
+    markup = InlineKeyboardMarkup()
+
+    markup.add(
+        InlineKeyboardButton(
+            "✅ Confirm",
+            callback_data=f"confirm_{user_id}"
+        )
     )
-)
 
-bot.send_message(
-    ADMIN_ID,
-    f"💰 ОПЛАТА\nUser: {user_id}\nPlan: {plan}",
-    reply_markup=markup
-)
+    bot.send_message(
+        ADMIN_ID,
+        f"💰 ОПЛАТА\nUser: {user_id}\nPlan: {plan}",
+        reply_markup=markup
+    )
+
+    bot.answer_callback_query(
+        call.id,
+        "Заявка отправлена админу"
+    )
 
 # ---------------- BACK ----------------
 @bot.callback_query_handler(func=lambda call: call.data == "back")
