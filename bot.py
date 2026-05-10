@@ -171,8 +171,13 @@ def paid(call):
     )
 
     admin_markup = InlineKeyboardMarkup()
+
     admin_markup.add(
-        InlineKeyboardButton("✅ Подтвердить", callback_data=f"confirm_{uid}")
+        InlineKeyboardButton("✅ Подтвердить", callback_data=f"confirm_{user_id}")
+    )
+
+    admin_markup.add(
+        InlineKeyboardButton("❌ Отклонить", callback_data=f"reject_{user_id}")
     )
 
     bot.send_message(
@@ -181,6 +186,31 @@ def paid(call):
         reply_markup=admin_markup
     )
 
+#___reject
+@bot.callback_query_handler(func=lambda call: call.data.startswith("reject_"))
+def reject(call):
+
+    if call.from_user.id != ADMIN_ID:
+        return
+
+    user_id = int(call.data.split("_")[1])
+
+    pending_payments.pop(user_id, None)
+
+    # уведомление пользователю
+    bot.send_message(
+        user_id,
+        "❌ Заявка отклонена администратором"
+    )
+
+    # обновляем сообщение админа
+    bot.edit_message_text(
+        f"❌ ОТКЛОНЕНО\nUser: {user_id}",
+        call.message.chat.id,
+        call.message.message_id
+    )
+
+    bot.answer_callback_query(call.id, "Отклонено")
 
 # ================= MENU CALLBACK =================
 @bot.callback_query_handler(func=lambda c: c.data == "menu")
@@ -255,27 +285,35 @@ def confirm(call):
 
     subs[uid] = {"expire": expire, "plan": plan_key}
 
+    # ---------- INVITE LINK ----------
     invite = bot.create_chat_invite_link(
         chat_id=CHANNEL_ID,
         member_limit=1
     )
 
-    bot.send_message(
-        uid,
-        "✅ Подписка выдана",
-        reply_markup=InlineKeyboardMarkup().add(
-            InlineKeyboardButton("🚀 Войти", url=invite.invite_link)
-        )
+# ---------- USER ----------
+    user_markup = InlineKeyboardMarkup()
+
+    user_markup.add(
+        InlineKeyboardButton("🚀 Присоединиться к каналу", url=invite.invite_link)
     )
 
+    bot.send_message(
+        user_id,
+        "✅ Заявка одобрена\n\n🎉 Доступ выдан",
+        reply_markup=user_markup
+)
+
+# ---------- ADMIN ----------
     bot.edit_message_text(
-        f"✅ Подтверждено\nUser: {uid}\nPlan: {plan_key}",
+        f"✅ ОДОБРЕНО\nUser: {user_id}",
         call.message.chat.id,
         call.message.message_id
-    )
+)
 
-    pending_payments.pop(uid, None)
-    bot.answer_callback_query(call.id, "OK")
+pending_payments.pop(user_id, None)
+
+bot.answer_callback_query(call.id, "Подтверждено")
 
 
 # ================= CHECK =================
