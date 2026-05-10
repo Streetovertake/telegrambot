@@ -180,16 +180,29 @@ def back(call):
     prev = pop(user_id)
 
     if not prev:
-        show_menu(call.message.chat.id, call.message.message_id)
+        show_menu(
+            call.message.chat.id,
+            call.message.message_id
+        )
         return
 
     if prev == "menu":
-        show_menu(call.message.chat.id, call.message.message_id)
+
+        show_menu(
+            call.message.chat.id,
+            call.message.message_id
+        )
 
     elif prev == "tariffs":
-        show_tariffs(call.message.chat.id, call.message.message_id)
+
+        show_tariffs(
+            call.message.chat.id,
+            call.message.message_id,
+            call.from_user.id
+        )
 
     elif prev.startswith("plan_"):
+
         plan_key = prev.split("_")[1]
 
         user_state[user_id] = plan_key
@@ -197,16 +210,47 @@ def back(call):
         plan_data = PLANS[plan_key]
 
         markup = InlineKeyboardMarkup()
-        markup.add(InlineKeyboardButton("💳 Карта", callback_data=f"card_{plan_key}"))
-        markup.add(InlineKeyboardButton("💰 USDT", callback_data=f"usdt_{plan_key}"))
-        markup.add(InlineKeyboardButton("🚀 Boosty", callback_data=f"boosty_{plan_key}"))
-        markup.add(InlineKeyboardButton("⬅ Назад", callback_data="back"))
+
+        markup.add(
+            InlineKeyboardButton(
+                "💳 Карта",
+                callback_data=f"card_{plan_key}"
+            )
+        )
+
+        markup.add(
+            InlineKeyboardButton(
+                "💰 USDT",
+                callback_data=f"usdt_{plan_key}"
+            )
+        )
+
+        markup.add(
+            InlineKeyboardButton(
+                "🚀 Boosty",
+                callback_data=f"boosty_{plan_key}"
+            )
+        )
+
+        markup.add(
+            InlineKeyboardButton(
+                "⬅ Назад",
+                callback_data="back"
+            )
+        )
 
         safe_edit(
             call,
             f"🔥 <b>{plan_data['title']}</b>\n💸 {plan_data['price']}₽",
             markup
-    )
+        )
+
+    else:
+
+        show_menu(
+            call.message.chat.id,
+            call.message.message_id
+        )
 
 # ---------------- TRIAL ----------------
 @bot.callback_query_handler(func=lambda call: call.data == "trial")
