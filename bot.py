@@ -190,22 +190,22 @@ def back(call):
         show_tariffs(call.message.chat.id, call.message.message_id)
 
     elif prev.startswith("plan_"):
-    plan_key = prev.split("_")[1]
+        plan_key = prev.split("_")[1]
 
-    user_state[user_id] = plan_key
+        user_state[user_id] = plan_key
 
-    plan_data = PLANS[plan_key]
+        plan_data = PLANS[plan_key]
 
-    markup = InlineKeyboardMarkup()
-    markup.add(InlineKeyboardButton("💳 Карта", callback_data=f"card_{plan_key}"))
-    markup.add(InlineKeyboardButton("💰 USDT", callback_data=f"usdt_{plan_key}"))
-    markup.add(InlineKeyboardButton("🚀 Boosty", callback_data=f"boosty_{plan_key}"))
-    markup.add(InlineKeyboardButton("⬅ Назад", callback_data="back"))
+        markup = InlineKeyboardMarkup()
+        markup.add(InlineKeyboardButton("💳 Карта", callback_data=f"card_{plan_key}"))
+        markup.add(InlineKeyboardButton("💰 USDT", callback_data=f"usdt_{plan_key}"))
+        markup.add(InlineKeyboardButton("🚀 Boosty", callback_data=f"boosty_{plan_key}"))
+        markup.add(InlineKeyboardButton("⬅ Назад", callback_data="back"))
 
-    safe_edit(
-        call,
-        f"🔥 <b>{plan_data['title']}</b>\n💸 {plan_data['price']}₽",
-        markup
+        safe_edit(
+            call,
+            f"🔥 <b>{plan_data['title']}</b>\n💸 {plan_data['price']}₽",
+            markup
     )
 
 # ---------------- TRIAL ----------------
