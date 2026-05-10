@@ -76,9 +76,9 @@ def show_tariffs(chat_id, message_id=None, user_id=None):
     markup = InlineKeyboardMarkup()
 
     for k, v in PLANS.items():
-    markup.add(InlineKeyboardButton(
-        f"{v['title']} / {v['price']}₽",
-        callback_data=f"plan_{k}"
+        markup.add(InlineKeyboardButton(
+            f"{v['title']} / {v['price']}₽",
+            callback_data=f"plan_{k}"
     ))
 
     markup.add(
