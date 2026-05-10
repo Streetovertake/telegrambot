@@ -311,9 +311,9 @@ def confirm(call):
         call.message.message_id
 )
 
-pending_payments.pop(user_id, None)
+    pending_payments.pop(user_id, None)
 
-bot.answer_callback_query(call.id, "Подтверждено")
+    bot.answer_callback_query(call.id, "Подтверждено")
 
 
 # ================= CHECK =================
