@@ -228,16 +228,16 @@ safe_edit(
     markup
     )
 
-    bot.send_message(
-        ADMIN_ID,
-        f"💰 ОПЛАТА\nUser: {user_id}\nPlan: {plan}",
-        reply_markup=admin_markup
+bot.send_message(
+    ADMIN_ID,
+    f"💰 ОПЛАТА\nUser: {user_id}\nPlan: {plan}",
+    reply_markup=admin_markup
         
     )
 
-    bot.answer_callback_query(
-        call.id,
-        "Заявка отправлена админу"
+bot.answer_callback_query(
+    call.id,
+    "Заявка отправлена админу"
     )
 
 # ---------------- BACK ----------------
