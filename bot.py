@@ -40,8 +40,8 @@ def safe_edit(call, text, markup=None):
             reply_markup=markup,
             parse_mode="HTML"
         )
-    except:
-        pass
+    except Exception as e:
+    print("ERROR:", e)
 
 
 # ================= MENU =================
@@ -153,8 +153,8 @@ def boosty(c): pay(c, "boosty", c.data.split("_")[1])
 @bot.callback_query_handler(func=lambda c: c.data == "paid")
 def paid(call):
 
-    uid = call.from_user.id
-    plan = user_state.get(uid)
+    user_id = call.from_user.id   # 👈 ВОТ ЭТО ДОБАВИТЬ
+    plan_key = user_state.get(user_id)
 
     if not plan:
         bot.answer_callback_query(call.id, "Ошибка")
