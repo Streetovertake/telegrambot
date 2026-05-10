@@ -14,6 +14,7 @@ subs = {}
 pending_payments = {}
 user_state = {}
 nav_stack = {}
+last_render = {}
 
 # ---------------- STACK ----------------
 def push(user_id, state):
@@ -23,6 +24,21 @@ def pop(user_id):
     if nav_stack.get(user_id):
         return nav_stack[user_id].pop()
     return None
+
+#___safe
+def safe_edit(call, text, markup=None):
+    try:
+        bot.edit_message_text(
+            text,
+            call.message.chat.id,
+            call.message.message_id,
+            reply_markup=markup,
+            parse_mode="HTML"
+        )
+    except Exception:
+        # игнорируем "message is not modified"
+        pass
+
 
 # ---------------- PLANS ----------------
 PLANS = {
@@ -91,7 +107,15 @@ def plan(call):
 # ---------------- SHOW PLAN ----------------
 def show_plan(call, plan_key):
 
+    user_id = call.from_user.id
     plan = PLANS[plan_key]
+
+    # защита от повторного рендера
+    if last_render.get(user_id) == f"plan_{plan_key}":
+        return
+    last_render[user_id] = f"plan_{plan_key}"
+
+    user_state[user_id] = plan_key
 
     markup = InlineKeyboardMarkup()
     markup.add(InlineKeyboardButton("💳 Карта", callback_data=f"card_{plan_key}"))
@@ -99,13 +123,9 @@ def show_plan(call, plan_key):
     markup.add(InlineKeyboardButton("🚀 Boosty", callback_data=f"boosty_{plan_key}"))
     markup.add(InlineKeyboardButton("⬅ Назад", callback_data="back"))
 
-    bot.edit_message_text(
-        f"🔥 <b>{plan['title']}</b>\n💸 {plan['price']}₽",
-        call.message.chat.id,
-        call.message.message_id,
-        reply_markup=markup,
-        parse_mode="HTML"
-    )
+    text = f"🔥 <b>{plan['title']}</b>\n💸 {plan['price']}₽"
+
+    safe_edit(call, text, markup)
 
 # ---------------- TEST VIDEO ----------------
 @bot.callback_query_handler(func=lambda call: call.data == "trial_video")
@@ -220,6 +240,9 @@ def back(call):
         show_menu(call.message.chat.id, call.message.message_id)
         return
 
+    # сбрасываем защиту рендера при переходах назад
+    last_render.pop(user_id, None)
+
     if prev == "menu":
         show_menu(call.message.chat.id, call.message.message_id)
 
@@ -229,10 +252,7 @@ def back(call):
     elif prev.startswith("plan_"):
         plan_key = prev.split("_")[1]
         show_plan(call, plan_key)
-
-    else:
-        show_menu(call.message.chat.id, call.message.message_id)
-
+        
 # ---------------- RUN ----------------
 print("BOT STARTED")
 bot.infinity_polling(skip_pending=True)
