@@ -76,10 +76,17 @@ def show_tariffs(chat_id, message_id=None, user_id=None):
     markup = InlineKeyboardMarkup()
 
     for k, v in PLANS.items():
-        markup.add(InlineKeyboardButton(
-            f"{v['title']} / {v['price']}₽",
-            callback_data=f"plan_{k}"
-        ))
+    markup.add(InlineKeyboardButton(
+        f"{v['title']} / {v['price']}₽",
+        callback_data=f"plan_{k}"
+    ))
+
+    markup.add(
+        InlineKeyboardButton(
+            "⬅ Назад",
+            callback_data="back"
+        )
+    )
 
     text = "💰 <b>Выбери тариф</b>"
 
@@ -181,11 +188,19 @@ def paid(call):
 
     markup = InlineKeyboardMarkup()
 
+    markup = InlineKeyboardMarkup()
+
     markup.add(
         InlineKeyboardButton(
-            "✅ Confirm",
-            callback_data=f"confirm_{user_id}"
+            "📱 В меню",
+            callback_data="menu"
         )
+    )
+
+    safe_edit(
+        call,
+        "⏳ Платеж отправлен\n\nОжидай подтверждения администратора",
+        markup
     )
 
     bot.send_message(
