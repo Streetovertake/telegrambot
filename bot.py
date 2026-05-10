@@ -119,6 +119,25 @@ def plan(call):
         reply_markup=markup
     )
 
+#___callback handler
+@bot.callback_query_handler(func=lambda call: call.data == "trial_video")
+def trial_video(call):
+
+    markup = InlineKeyboardMarkup()
+    markup.add(InlineKeyboardButton("⬅ Назад", callback_data="back"))
+
+    bot.edit_message_text(
+        "🎬 Вот тестовое видео 👇\n\n(сюда позже вставишь приватный канал или ссылку)",
+        call.message.chat.id,
+        call.message.message_id,
+        reply_markup=markup
+    )
+    
+@bot.callback_query_handler(func=lambda call: call.data == "tariffs")
+def tariffs(call):
+
+    show_tariffs(call.message.chat.id, call.message.message_id)
+    
 #___showplan
 
 def show_plan(call, plan_key):
