@@ -156,39 +156,43 @@ def boosty(c): pay(c, "boosty", c.data.split("_")[1])
 @bot.callback_query_handler(func=lambda c: c.data == "paid")
 def paid(call):
 
-    user_id = call.from_user.id
-    plan_key = user_state.get(user_id)
+    uid = call.from_user.id
+    plan_key = user_state.get(uid)
 
     if not plan_key:
         bot.answer_callback_query(call.id, "Ошибка")
         return
 
-    # ❗ блок повторной заявки
-    if user_id in pending_payments:
-        bot.answer_callback_query(call.id, "Заявка уже на проверке")
+    if uid in pending_payments:
+        bot.answer_callback_query(call.id, "Заявка уже отправлена")
         return
 
-    pending_payments[user_id] = plan_key
+    pending_payments[uid] = plan_key
 
-    user_markup = InlineKeyboardMarkup()
-    user_markup.add(InlineKeyboardButton("📱 В меню", callback_data="menu"))
+    # ❗ ОСТАЁТСЯ НА ЭТОМ ЖЕ ЭКРАНЕ (не уводим назад)
+    markup = InlineKeyboardMarkup()
+    markup.add(InlineKeyboardButton("⏳ Ожидай подтверждения", callback_data="wait"))
 
-    safe_edit(call,
-        "⏳ Платеж отправлен\nОжидай подтверждения",
-        user_markup
-    )
+    try:
+        bot.edit_message_reply_markup(
+            chat_id=call.message.chat.id,
+            message_id=call.message.message_id,
+            reply_markup=markup
+        )
+    except:
+        pass
 
     admin_markup = InlineKeyboardMarkup()
-    admin_markup.add(InlineKeyboardButton("✅ Подтвердить", callback_data=f"confirm_{user_id}"))
-    admin_markup.add(InlineKeyboardButton("❌ Отклонить", callback_data=f"reject_{user_id}"))
+    admin_markup.add(InlineKeyboardButton("✅ Подтвердить", callback_data=f"confirm_{uid}"))
+    admin_markup.add(InlineKeyboardButton("❌ Отклонить", callback_data=f"reject_{uid}"))
 
     bot.send_message(
         ADMIN_ID,
-        f"💰 НОВАЯ ОПЛАТА\nUser: {user_id}\nPlan: {plan_key}",
+        f"💰 ОПЛАТА\nUser: {uid}\nPlan: {plan_key}",
         reply_markup=admin_markup
     )
 
-    bot.answer_callback_query(call.id, "Отправлено админу")
+    bot.answer_callback_query(call.id, "Отправлено")
 
 
 # ---------------- REJECT ----------------
@@ -214,14 +218,19 @@ def reject(call):
 
 
 # ---------------- CONFIRM ----------------
-@bot.callback_query_handler(func=lambda c: c.data.startswith("confirm_"))
+@bot.callback_query_handler(func=lambda c: c.data and c.data.startswith("confirm_"))
 def confirm(call):
 
     if call.from_user.id != ADMIN_ID:
         return
 
     uid = int(call.data.split("_")[1])
-    plan_key = pending_payments.get(uid)
+
+    if uid not in pending_payments:
+        bot.answer_callback_query(call.id, "Заявка не найдена")
+        return
+
+    plan_key = pending_payments[uid]
 
     if not plan_key:
         bot.answer_callback_query(call.id, "Нет заявки")
