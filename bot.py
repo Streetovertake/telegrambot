@@ -7,7 +7,7 @@ from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 TOKEN = os.environ["TOKEN"]
 ADMIN_ID = int(os.environ["ADMIN_ID"])
 USDT_WALLET = os.environ["USDT_WALLET"]
-
+CHANNEL_ID = os.environ["CHANNEL_ID"]
 bot = telebot.TeleBot(TOKEN)
 
 # ---------------- STORAGE ----------------
@@ -186,9 +186,34 @@ def paid(call):
 
     pending_payments[user_id] = plan
 
-    markup = InlineKeyboardMarkup()
+    # ---------- USER MARKUP ----------
 
-    markup = InlineKeyboardMarkup()
+user_markup = InlineKeyboardMarkup()
+
+user_markup.add(
+    InlineKeyboardButton(
+        "📱 В меню",
+        callback_data="menu"
+    )
+)
+
+safe_edit(
+    call,
+    "⏳ Платеж отправлен\n\nОжидай подтверждения администратора",
+    user_markup
+)
+
+# ---------- ADMIN MARKUP ----------
+
+admin_markup = InlineKeyboardMarkup()
+
+admin_markup.add(
+    InlineKeyboardButton(
+        "✅ Подтвердить",
+        callback_data=f"confirm_{user_id}"
+    )
+)
+
 
     markup.add(
         InlineKeyboardButton(
@@ -206,7 +231,8 @@ def paid(call):
     bot.send_message(
         ADMIN_ID,
         f"💰 ОПЛАТА\nUser: {user_id}\nPlan: {plan}",
-        reply_markup=markup
+        reply_markup=admin_markup
+        
     )
 
     bot.answer_callback_query(
@@ -322,41 +348,65 @@ def confirm(call):
     plan_key = pending_payments.get(user_id)
 
     if not plan_key:
+        bot.answer_callback_query(call.id, "Заявка не найдена")
         return
 
     plan = PLANS[plan_key]
 
+    # ---------- ПРОДЛЕНИЕ ПОДПИСКИ ----------
+
     now = datetime.now()
 
-    # если подписка уже есть — продлеваем
-    if user_id in subs and subs[user_id]["expire"] > now:
+    if user_id in subs:
+        current_expire = subs[user_id]["expire"]
 
-        new_expire = subs[user_id]["expire"] + timedelta(
-            days=plan["days"]
-        )
-
+        if current_expire > now:
+            expire = current_expire + timedelta(days=plan["days"])
+        else:
+            expire = now + timedelta(days=plan["days"])
     else:
-
-        new_expire = now + timedelta(
-            days=plan["days"]
-        )
+        expire = now + timedelta(days=plan["days"])
 
     subs[user_id] = {
-        "expire": new_expire,
+        "expire": expire,
         "plan": plan_key
     }
 
-    bot.send_message(
-        user_id,
-        "✅ Оплата подтверждена"
+    # ---------- CREATE INVITE LINK ----------
+
+    invite = bot.create_chat_invite_link(
+        chat_id=CHANNEL_ID,
+        member_limit=1
+    )
+
+    # ---------- USER MESSAGE ----------
+
+    user_markup = InlineKeyboardMarkup()
+
+    user_markup.add(
+        InlineKeyboardButton(
+            "🚀 Войти в канал",
+            url=invite.invite_link
+        )
     )
 
     bot.send_message(
-        ADMIN_ID,
-        f"Выдан план {plan_key}"
+        user_id,
+        "✅ Оплата подтверждена администрацией\n\n🎉 Подписка выдана",
+        reply_markup=user_markup
+    )
+
+    # ---------- ADMIN ----------
+
+    bot.edit_message_text(
+        f"✅ Подтверждено\nUser: {user_id}\nPlan: {plan_key}",
+        call.message.chat.id,
+        call.message.message_id
     )
 
     pending_payments.pop(user_id, None)
+
+    bot.answer_callback_query(call.id, "Подписка выдана")
 
 #____
 @bot.callback_query_handler(func=lambda call: call.data == "check")
