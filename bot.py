@@ -173,80 +173,48 @@ def card(call):
 def boosty(call):
     pay(call, "boosty", call.data.split("_")[1])
 
+
 # ---------------- PAID ----------------
 @bot.callback_query_handler(func=lambda call: call.data == "paid")
 def paid(call):
 
     user_id = call.from_user.id
-    plan = user_state.get(user_id)
+    plan_key = user_state.get(user_id)
 
-    if not plan:
-        bot.send_message(user_id, "Ошибка")
+    if not plan_key:
+        bot.answer_callback_query(call.id, "Ошибка: выбери тариф")
         return
 
-    pending_payments[user_id] = plan
+    pending_payments[user_id] = plan_key
 
+    # USER SCREEN
     user_markup = InlineKeyboardMarkup()
     user_markup.add(
         InlineKeyboardButton("📱 В меню", callback_data="menu")
     )
 
-    bot.edit_message_text(
+    safe_edit(
+        call,
         "⏳ Платеж отправлен\n\nОжидай подтверждения администратора",
-        call.message.chat.id,
-        call.message.message_id,
-        reply_markup=user_markup,
-        parse_mode="HTML"
+        user_markup
     )
 
-    # уведомление админу
+    # ADMIN SCREEN
     admin_markup = InlineKeyboardMarkup()
-    admin_markup.add(
-        InlineKeyboardButton("✅ Подтвердить", callback_data=f"confirm_{user_id}")
-    )
-
-    bot.send_message(
-        ADMIN_ID,
-        f"💰 ОПЛАТА\nUser: {user_id}\nPlan: {plan}",
-        reply_markup=admin_markup
-    )
-
-# ---------- ADMIN MARKUP ----------
-
-    admin_markup = InlineKeyboardMarkup()
-
     admin_markup.add(
         InlineKeyboardButton(
             "✅ Подтвердить",
             callback_data=f"confirm_{user_id}"
-    )
-)
-
-
-    markup.add(
-        InlineKeyboardButton(
-            "📱 В меню",
-            callback_data="menu"
-    )
-)
-
-    safe_edit(
-        call,
-        "⏳ Платеж отправлен\n\nОжидай подтверждения администратора",
-        markup
         )
-
-bot.send_message(
-    ADMIN_ID,
-    f"💰 ОПЛАТА\nUser: {user_id}\nPlan: {plan}",
-    reply_markup=admin_markup
-        
     )
 
-bot.answer_callback_query(
-    call.id,
-    "Заявка отправлена админу"
+    bot.send_message(
+        ADMIN_ID,
+        f"💰 ОПЛАТА\nUser: {user_id}\nPlan: {plan_key}",
+        reply_markup=admin_markup
     )
+
+    bot.answer_callback_query(call.id, "Заявка отправлена")
 
 # ---------------- BACK ----------------
 @bot.callback_query_handler(func=lambda call: call.data == "back")
@@ -356,11 +324,47 @@ def confirm(call):
     plan_key = pending_payments.get(user_id)
 
     if not plan_key:
-        bot.answer_callback_query(call.id, "Заявка не найдена")
+        bot.answer_callback_query(call.id, "Нет заявки")
         return
 
     plan = PLANS[plan_key]
 
+    now = datetime.now()
+
+    if user_id in subs:
+        current = subs[user_id]["expire"]
+        expire = current + timedelta(days=plan["days"]) if current > now else now + timedelta(days=plan["days"])
+    else:
+        expire = now + timedelta(days=plan["days"])
+
+    subs[user_id] = {
+        "expire": expire,
+        "plan": plan_key
+    }
+
+    # invite link
+    invite = bot.create_chat_invite_link(
+        chat_id=CHANNEL_ID,
+        member_limit=1
+    )
+
+    bot.send_message(
+        user_id,
+        "✅ Оплата подтверждена\n\n🎉 Доступ выдан",
+        reply_markup=InlineKeyboardMarkup().add(
+            InlineKeyboardButton("🚀 Войти", url=invite.invite_link)
+        )
+    )
+
+    bot.edit_message_text(
+        f"✅ Подтверждено\nUser: {user_id}\nPlan: {plan_key}",
+        call.message.chat.id,
+        call.message.message_id
+    )
+
+    pending_payments.pop(user_id, None)
+
+    bot.answer_callback_query(call.id, "Готово")
     # ---------- ПРОДЛЕНИЕ ПОДПИСКИ ----------
 
     now = datetime.now()
