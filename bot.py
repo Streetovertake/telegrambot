@@ -215,12 +215,12 @@ admin_markup.add(
 )
 
 
-    markup.add(
-        InlineKeyboardButton(
-            "📱 В меню",
-            callback_data="menu"
-        )
+markup.add(
+    InlineKeyboardButton(
+        "📱 В меню",
+        callback_data="menu"
     )
+)
 
     safe_edit(
         call,
