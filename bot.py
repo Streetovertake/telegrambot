@@ -186,22 +186,30 @@ def paid(call):
 
     pending_payments[user_id] = plan
 
-    # ---------- USER MARKUP ----------
-
-user_markup = InlineKeyboardMarkup()
-
-user_markup.add(
-    InlineKeyboardButton(
-        "📱 В меню",
-        callback_data="menu"
+    user_markup = InlineKeyboardMarkup()
+    user_markup.add(
+        InlineKeyboardButton("📱 В меню", callback_data="menu")
     )
-)
 
-safe_edit(
-    call,
-    "⏳ Платеж отправлен\n\nОжидай подтверждения администратора",
-    user_markup
-)
+    bot.edit_message_text(
+        "⏳ Платеж отправлен\n\nОжидай подтверждения администратора",
+        call.message.chat.id,
+        call.message.message_id,
+        reply_markup=user_markup,
+        parse_mode="HTML"
+    )
+
+    # уведомление админу
+    admin_markup = InlineKeyboardMarkup()
+    admin_markup.add(
+        InlineKeyboardButton("✅ Подтвердить", callback_data=f"confirm_{user_id}")
+    )
+
+    bot.send_message(
+        ADMIN_ID,
+        f"💰 ОПЛАТА\nUser: {user_id}\nPlan: {plan}",
+        reply_markup=admin_markup
+    )
 
 # ---------- ADMIN MARKUP ----------
 
