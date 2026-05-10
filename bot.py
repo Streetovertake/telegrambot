@@ -3,14 +3,13 @@ import os
 from datetime import datetime, timedelta
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 
-# ---------------- INIT ----------------
 TOKEN = os.environ["TOKEN"]
 ADMIN_ID = int(os.environ["ADMIN_ID"])
 USDT_WALLET = os.environ["USDT_WALLET"]
 CHANNEL_ID = os.environ["CHANNEL_ID"]
+
 bot = telebot.TeleBot(TOKEN)
 
-# ---------------- STORAGE ----------------
 subs = {}
 pending_payments = {}
 user_state = {}
@@ -24,7 +23,7 @@ PLANS = {
     "ahhh": {"days": 30, "price": 4990, "title": "Ahhh"}
 }
 
-# ---------------- NAV STACK ----------------
+# ---------------- NAV ----------------
 def push(uid, state):
     nav_stack.setdefault(uid, []).append(state)
 
@@ -44,14 +43,9 @@ def safe_edit(call, text, markup=None):
     except:
         pass
 
-# ---------------- START ----------------
-@bot.message_handler(commands=['start'])
-def start(message):
-    show_menu(message.chat.id)
 
-# ---------------- MENU ----------------
+# ================= MENU =================
 def show_menu(chat_id, message_id=None):
-
     markup = InlineKeyboardMarkup()
     markup.add(InlineKeyboardButton("📊 Проверить подписку", callback_data="check"))
     markup.add(InlineKeyboardButton("🎥 Тестовое видео", callback_data="trial"))
@@ -59,15 +53,18 @@ def show_menu(chat_id, message_id=None):
 
     text = "📱 <b>МЕНЮ</b>"
 
-    try:
-        if message_id:
-            bot.edit_message_text(text, chat_id, message_id, reply_markup=markup, parse_mode="HTML")
-        else:
-            bot.send_message(chat_id, text, reply_markup=markup, parse_mode="HTML")
-    except:
-        pass
+    if message_id:
+        bot.edit_message_text(text, chat_id, message_id, reply_markup=markup, parse_mode="HTML")
+    else:
+        bot.send_message(chat_id, text, reply_markup=markup, parse_mode="HTML")
 
-# ---------------- TARIFS ----------------
+
+@bot.message_handler(commands=['start'])
+def start(message):
+    show_menu(message.chat.id)
+
+
+# ================= TARIFS =================
 def show_tariffs(chat_id, message_id=None, user_id=None):
 
     if user_id:
@@ -79,225 +76,150 @@ def show_tariffs(chat_id, message_id=None, user_id=None):
         markup.add(InlineKeyboardButton(
             f"{v['title']} / {v['price']}₽",
             callback_data=f"plan_{k}"
-    ))
+        ))
 
-    markup.add(
-        InlineKeyboardButton(
-            "⬅ Назад",
-            callback_data="back"
-        )
-    )
+    markup.add(InlineKeyboardButton("⬅ Назад", callback_data="back"))
 
     text = "💰 <b>Выбери тариф</b>"
 
-    try:
-        if message_id:
-            bot.edit_message_text(text, chat_id, message_id, reply_markup=markup, parse_mode="HTML")
-        else:
-            bot.send_message(chat_id, text, reply_markup=markup, parse_mode="HTML")
-    except:
-        pass
-        
-#----- 
-@bot.callback_query_handler(func=lambda call: call.data == "tariffs")
+    if message_id:
+        bot.edit_message_text(text, chat_id, message_id, reply_markup=markup, parse_mode="HTML")
+    else:
+        bot.send_message(chat_id, text, reply_markup=markup, parse_mode="HTML")
+
+
+@bot.callback_query_handler(func=lambda c: c.data == "tariffs")
 def tariffs(call):
-
     push(call.from_user.id, "menu")
+    show_tariffs(call.message.chat.id, call.message.message_id, call.from_user.id)
 
-    show_tariffs(
-        call.message.chat.id,
-        call.message.message_id,
-        call.from_user.id
-    )
 
-# ---------------- PLAN OPEN ----------------
-@bot.callback_query_handler(func=lambda call: call.data.startswith("plan_"))
+# ================= PLAN =================
+@bot.callback_query_handler(func=lambda c: c.data.startswith("plan_"))
 def plan(call):
 
-    user_id = call.from_user.id
-    plan_key = call.data.split("_")[1]
+    uid = call.from_user.id
+    key = call.data.split("_")[1]
 
-    if plan_key not in PLANS:
+    if key not in PLANS:
         return
 
-    user_state[user_id] = plan_key
-    push(user_id, "tariffs")
+    user_state[uid] = key
+    push(uid, "tariffs")
 
-    plan = PLANS[plan_key]
+    p = PLANS[key]
 
     markup = InlineKeyboardMarkup()
-    markup.add(InlineKeyboardButton("💳 Карта", callback_data=f"card_{plan_key}"))
-    markup.add(InlineKeyboardButton("💰 USDT", callback_data=f"usdt_{plan_key}"))
-    markup.add(InlineKeyboardButton("🚀 Boosty", callback_data=f"boosty_{plan_key}"))
+    markup.add(InlineKeyboardButton("💳 Карта", callback_data=f"card_{key}"))
+    markup.add(InlineKeyboardButton("💰 USDT", callback_data=f"usdt_{key}"))
+    markup.add(InlineKeyboardButton("🚀 Boosty", callback_data=f"boosty_{key}"))
     markup.add(InlineKeyboardButton("⬅ Назад", callback_data="back"))
 
-    text = f"🔥 <b>{plan['title']}</b>\n💸 {plan['price']}₽"
+    safe_edit(call, f"🔥 <b>{p['title']}</b>\n💸 {p['price']}₽", markup)
 
-    safe_edit(call, text, markup)
 
-# ---------------- PAY SCREEN ----------------
-def pay(call, method, plan_key):
+# ================= PAY =================
+def pay(call, method, key):
 
-    plan = PLANS.get(plan_key)
-    if not plan:
-        return
-
-    user_id = call.from_user.id
-    user_state[user_id] = plan_key
-
-    push(user_id, f"plan_{plan_key}")
+    uid = call.from_user.id
+    user_state[uid] = key
+    push(uid, f"plan_{key}")
 
     markup = InlineKeyboardMarkup()
     markup.add(InlineKeyboardButton("⬅ Назад", callback_data="back"))
     markup.add(InlineKeyboardButton("✅ Я оплатил", callback_data="paid"))
 
     if method == "usdt":
-        text = f"💰 USDT:\n<code>{USDT_WALLET}</code>"
+        text = f"USDT:\n<code>{USDT_WALLET}</code>"
     elif method == "card":
-        text = "💳 Карта:\n<code>2202....</code>"
+        text = "Карта:\n<code>2202....</code>"
     else:
-        text = "🚀 Boosty ссылка"
+        text = "Boosty"
 
     safe_edit(call, text, markup)
 
-# ---------------- PAY HANDLERS ----------------
-@bot.callback_query_handler(func=lambda call: call.data.startswith("usdt_"))
-def usdt(call):
-    pay(call, "usdt", call.data.split("_")[1])
 
-@bot.callback_query_handler(func=lambda call: call.data.startswith("card_"))
-def card(call):
-    pay(call, "card", call.data.split("_")[1])
+@bot.callback_query_handler(func=lambda c: c.data.startswith("usdt_"))
+def usdt(c): pay(c, "usdt", c.data.split("_")[1])
 
-@bot.callback_query_handler(func=lambda call: call.data.startswith("boosty_"))
-def boosty(call):
-    pay(call, "boosty", call.data.split("_")[1])
+@bot.callback_query_handler(func=lambda c: c.data.startswith("card_"))
+def card(c): pay(c, "card", c.data.split("_")[1])
+
+@bot.callback_query_handler(func=lambda c: c.data.startswith("boosty_"))
+def boosty(c): pay(c, "boosty", c.data.split("_")[1])
 
 
-# ---------------- PAID ----------------
-@bot.callback_query_handler(func=lambda call: call.data == "paid")
+# ================= PAID =================
+@bot.callback_query_handler(func=lambda c: c.data == "paid")
 def paid(call):
 
-    user_id = call.from_user.id
-    plan_key = user_state.get(user_id)
+    uid = call.from_user.id
+    plan = user_state.get(uid)
 
-    if not plan_key:
-        bot.answer_callback_query(call.id, "Ошибка: выбери тариф")
+    if not plan:
+        bot.answer_callback_query(call.id, "Ошибка")
         return
 
-    pending_payments[user_id] = plan_key
+    pending_payments[uid] = plan
 
-    # USER SCREEN
     user_markup = InlineKeyboardMarkup()
-    user_markup.add(
-        InlineKeyboardButton("📱 В меню", callback_data="menu")
-    )
+    user_markup.add(InlineKeyboardButton("📱 В меню", callback_data="menu"))
 
-    safe_edit(
-        call,
-        "⏳ Платеж отправлен\n\nОжидай подтверждения администратора",
+    safe_edit(call,
+        "⏳ Платеж отправлен\nОжидай подтверждения",
         user_markup
     )
 
-    # ADMIN SCREEN
     admin_markup = InlineKeyboardMarkup()
     admin_markup.add(
-        InlineKeyboardButton(
-            "✅ Подтвердить",
-            callback_data=f"confirm_{user_id}"
-        )
+        InlineKeyboardButton("✅ Подтвердить", callback_data=f"confirm_{uid}")
     )
 
     bot.send_message(
         ADMIN_ID,
-        f"💰 ОПЛАТА\nUser: {user_id}\nPlan: {plan_key}",
+        f"💰 PAYMENT\nUser: {uid}\nPlan: {plan}",
         reply_markup=admin_markup
     )
 
-    bot.answer_callback_query(call.id, "Заявка отправлена")
 
-# ---------------- BACK ----------------
-@bot.callback_query_handler(func=lambda call: call.data == "back")
+# ================= MENU CALLBACK =================
+@bot.callback_query_handler(func=lambda c: c.data == "menu")
+def menu_cb(c):
+    show_menu(c.message.chat.id, c.message.message_id)
+
+
+# ================= BACK =================
+@bot.callback_query_handler(func=lambda c: c.data == "back")
 def back(call):
 
-    user_id = call.from_user.id
-    prev = pop(user_id)
+    uid = call.from_user.id
+    prev = pop(uid)
 
     if not prev:
-        show_menu(
-            call.message.chat.id,
-            call.message.message_id
-        )
+        show_menu(call.message.chat.id, call.message.message_id)
         return
 
     if prev == "menu":
-
-        show_menu(
-            call.message.chat.id,
-            call.message.message_id
-        )
+        show_menu(call.message.chat.id, call.message.message_id)
 
     elif prev == "tariffs":
-
-        show_tariffs(
-            call.message.chat.id,
-            call.message.message_id,
-            call.from_user.id
-        )
+        show_tariffs(call.message.chat.id, call.message.message_id, uid)
 
     elif prev.startswith("plan_"):
-
-        plan_key = prev.split("_")[1]
-
-        user_state[user_id] = plan_key
-
-        plan_data = PLANS[plan_key]
+        key = prev.split("_")[1]
+        p = PLANS[key]
 
         markup = InlineKeyboardMarkup()
+        markup.add(InlineKeyboardButton("💳 Карта", callback_data=f"card_{key}"))
+        markup.add(InlineKeyboardButton("💰 USDT", callback_data=f"usdt_{key}"))
+        markup.add(InlineKeyboardButton("🚀 Boosty", callback_data=f"boosty_{key}"))
+        markup.add(InlineKeyboardButton("⬅ Назад", callback_data="back"))
 
-        markup.add(
-            InlineKeyboardButton(
-                "💳 Карта",
-                callback_data=f"card_{plan_key}"
-            )
-        )
+        safe_edit(call, f"🔥 {p['title']}\n💸 {p['price']}₽", markup)
 
-        markup.add(
-            InlineKeyboardButton(
-                "💰 USDT",
-                callback_data=f"usdt_{plan_key}"
-            )
-        )
 
-        markup.add(
-            InlineKeyboardButton(
-                "🚀 Boosty",
-                callback_data=f"boosty_{plan_key}"
-            )
-        )
-
-        markup.add(
-            InlineKeyboardButton(
-                "⬅ Назад",
-                callback_data="back"
-            )
-        )
-
-        safe_edit(
-            call,
-            f"🔥 <b>{plan_data['title']}</b>\n💸 {plan_data['price']}₽",
-            markup
-        )
-
-    else:
-
-        show_menu(
-            call.message.chat.id,
-            call.message.message_id
-        )
-
-# ---------------- TRIAL ----------------
-@bot.callback_query_handler(func=lambda call: call.data == "trial")
+# ================= TRIAL =================
+@bot.callback_query_handler(func=lambda c: c.data == "trial")
 def trial(call):
 
     push(call.from_user.id, "menu")
@@ -305,23 +227,18 @@ def trial(call):
     markup = InlineKeyboardMarkup()
     markup.add(InlineKeyboardButton("⬅ Назад", callback_data="back"))
 
-    safe_edit(
-        call,
-        "🎥 Тестовое видео (сюда вставишь ссылку/канал)",
-        markup
-    )
-    
-#_____Confirm
-# ---------------- CONFIRM ----------------
-@bot.callback_query_handler(func=lambda call: call.data.startswith("confirm_"))
+    safe_edit(call, "🎥 Тестовое видео", markup)
+
+
+# ================= CONFIRM (ОДИН!) =================
+@bot.callback_query_handler(func=lambda c: c.data.startswith("confirm_"))
 def confirm(call):
 
     if call.from_user.id != ADMIN_ID:
         return
 
-    user_id = int(call.data.split("_")[1])
-
-    plan_key = pending_payments.get(user_id)
+    uid = int(call.data.split("_")[1])
+    plan_key = pending_payments.get(uid)
 
     if not plan_key:
         bot.answer_callback_query(call.id, "Нет заявки")
@@ -331,127 +248,54 @@ def confirm(call):
 
     now = datetime.now()
 
-    if user_id in subs:
-        current = subs[user_id]["expire"]
-        expire = current + timedelta(days=plan["days"]) if current > now else now + timedelta(days=plan["days"])
+    if uid in subs and subs[uid]["expire"] > now:
+        expire = subs[uid]["expire"] + timedelta(days=plan["days"])
     else:
         expire = now + timedelta(days=plan["days"])
 
-    subs[user_id] = {
-        "expire": expire,
-        "plan": plan_key
-    }
+    subs[uid] = {"expire": expire, "plan": plan_key}
 
-    # invite link
     invite = bot.create_chat_invite_link(
         chat_id=CHANNEL_ID,
         member_limit=1
     )
 
     bot.send_message(
-        user_id,
-        "✅ Оплата подтверждена\n\n🎉 Доступ выдан",
+        uid,
+        "✅ Подписка выдана",
         reply_markup=InlineKeyboardMarkup().add(
             InlineKeyboardButton("🚀 Войти", url=invite.invite_link)
         )
     )
 
     bot.edit_message_text(
-        f"✅ Подтверждено\nUser: {user_id}\nPlan: {plan_key}",
+        f"✅ Подтверждено\nUser: {uid}\nPlan: {plan_key}",
         call.message.chat.id,
         call.message.message_id
     )
 
-    pending_payments.pop(user_id, None)
+    pending_payments.pop(uid, None)
+    bot.answer_callback_query(call.id, "OK")
 
-    bot.answer_callback_query(call.id, "Готово")
-    
-@bot.callback_query_handler(func=lambda call: call.data and call.data.startswith("confirm_"))
-    
-    # ---------- ПРОДЛЕНИЕ ПОДПИСКИ ----------
 
-    now = datetime.now()
-
-    if user_id in subs:
-        current_expire = subs[user_id]["expire"]
-
-        if current_expire > now:
-            expire = current_expire + timedelta(days=plan["days"])
-        else:
-            expire = now + timedelta(days=plan["days"])
-    else:
-        expire = now + timedelta(days=plan["days"])
-
-    subs[user_id] = {
-        "expire": expire,
-        "plan": plan_key
-    }
-
-    # ---------- CREATE INVITE LINK ----------
-
-    invite = bot.create_chat_invite_link(
-        chat_id=CHANNEL_ID,
-        member_limit=1
-    )
-
-    # ---------- USER MESSAGE ----------
-
-    user_markup = InlineKeyboardMarkup()
-
-    user_markup.add(
-        InlineKeyboardButton(
-            "🚀 Войти в канал",
-            url=invite.invite_link
-        )
-    )
-
-    bot.send_message(
-        user_id,
-        "✅ Оплата подтверждена администрацией\n\n🎉 Подписка выдана",
-        reply_markup=user_markup
-    )
-
-    # ---------- ADMIN ----------
-
-    bot.edit_message_text(
-        f"✅ Подтверждено\nUser: {user_id}\nPlan: {plan_key}",
-        call.message.chat.id,
-        call.message.message_id
-    )
-
-    pending_payments.pop(user_id, None)
-
-    bot.answer_callback_query(call.id, "Подписка выдана")
-
-#____
-@bot.callback_query_handler(func=lambda call: call.data == "check")
+# ================= CHECK =================
+@bot.callback_query_handler(func=lambda c: c.data == "check")
 def check(call):
 
-    user_id = call.from_user.id
-
-    sub = subs.get(user_id)
+    uid = call.from_user.id
+    sub = subs.get(uid)
 
     markup = InlineKeyboardMarkup()
     markup.add(InlineKeyboardButton("⬅ Назад", callback_data="back"))
 
     if not sub:
-
-        text = "❌ Активной подписки нет"
-
+        text = "❌ Нет подписки"
     else:
-
-        expire = sub["expire"]
-        left = expire - datetime.now()
-
-        days = left.days
-
-        text = (
-            f"✅ Подписка: {sub['plan']}\n"
-            f"⏳ Осталось дней: {days}"
-        )
+        days = (sub["expire"] - datetime.now()).days
+        text = f"✅ {sub['plan']}\n⏳ Осталось: {days} дней"
 
     safe_edit(call, text, markup)
 
-# ---------------- RUN ----------------
+
 print("BOT STARTED")
 bot.infinity_polling(skip_pending=True)
