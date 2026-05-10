@@ -37,11 +37,6 @@ PLANS = {
 def start(message):
     show_menu(message.chat.id)
     
-    markup = InlineKeyboardMarkup()
-    
-    markup.add(InlineKeyboardButton("🎬 Тестовое видео", callback_data="trial_video"))
-    markup.add(InlineKeyboardButton("💰 Список тарифов", callback_data="tariffs"))
-    
 #___
 
 def back_to_plan(call):
