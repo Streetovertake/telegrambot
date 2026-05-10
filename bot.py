@@ -118,20 +118,28 @@ def add_user_to_channels(uid, plan_key):
     plan = PLANS[plan_key]
     invite_channel = None
     invite_chat = None
+
     try:
         if plan["vip"]:
-            lnk = bot.create_chat_invite_link(VIP_CHANNEL_ID, member_limit=1)
-            invite_channel = lnk.invite_link
-            lnk2 = bot.create_chat_invite_link(VIP_CHAT_ID, member_limit=1)
-            invite_chat = lnk2.invite_link
+            if VIP_CHANNEL_ID:
+                lnk = bot.create_chat_invite_link(VIP_CHANNEL_ID, member_limit=1)
+                invite_channel = lnk.invite_link
+
+            if VIP_CHAT_ID:
+                lnk2 = bot.create_chat_invite_link(VIP_CHAT_ID, member_limit=1)
+                invite_chat = lnk2.invite_link
+
         else:
             lnk = bot.create_chat_invite_link(CHANNEL_ID, member_limit=1)
             invite_channel = lnk.invite_link
+
             if plan_key == "lvl3":
                 lnk2 = bot.create_chat_invite_link(CHAT_ID, member_limit=1)
                 invite_chat = lnk2.invite_link
+
     except Exception as e:
-        print("create invite link error:", e)
+        print("INVITE ERROR:", e)
+
     return invite_channel, invite_chat
 
 
