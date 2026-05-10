@@ -365,6 +365,9 @@ def confirm(call):
     pending_payments.pop(user_id, None)
 
     bot.answer_callback_query(call.id, "Готово")
+    
+@bot.callback_query_handler(func=lambda call: call.data and call.data.startswith("confirm_"))
+    
     # ---------- ПРОДЛЕНИЕ ПОДПИСКИ ----------
 
     now = datetime.now()
