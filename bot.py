@@ -42,20 +42,20 @@ from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 # ================================================================
 
-TOKEN             = os.environ[“TOKEN”]
-ADMIN_ID          = int(os.environ[“ADMIN_ID”])
-ADMIN_USERNAME    = os.environ.get(“ADMIN_USERNAME”, “admin”)
-CARD_NUMBER       = os.environ.get(“CARD_NUMBER”, “0000 0000 0000 0000”)
-USDT_WALLET       = os.environ.get(“USDT_WALLET”, “wallet_address”)
-BOOSTY_URL        = os.environ.get(“BOOSTY_URL”, “https://boosty.to/”)
-TRIAL_CHANNEL_URL = os.environ.get(“TRIAL_CHANNEL_URL”, “https://t.me/”)
-CHANNEL_ID        = int(os.environ[“CHANNEL_ID”])
-CHAT_ID           = int(os.environ[“CHAT_ID”])
-VIP_CHANNEL_ID    = int(os.environ[“VIP_CHANNEL_ID”])
-VIP_CHAT_ID       = int(os.environ[“VIP_CHAT_ID”])
-TIKTOK_URL        = os.environ.get(“TIKTOK_URL”, “https://tiktok.com/”)
-INSTAGRAM_URL     = os.environ.get(“INSTAGRAM_URL”, “https://instagram.com/”)
-MAIN_CHANNEL_URL  = os.environ.get(“MAIN_CHANNEL_URL”, “https://t.me/”)
+TOKEN             = os.environ["TOKEN"]
+ADMIN_ID          = int(os.environ["ADMIN_ID"])
+ADMIN_USERNAME    = os.environ.get("ADMIN_USERNAME", "admin")
+CARD_NUMBER       = os.environ.get("CARD_NUMBER", "0000 0000 0000 0000")
+USDT_WALLET       = os.environ.get("USDT_WALLET", "wallet_address")
+BOOSTY_URL        = os.environ.get("BOOSTY_URL", "https://boosty.to/")
+TRIAL_CHANNEL_URL = os.environ.get("TRIAL_CHANNEL_URL", "https://t.me/")
+CHANNEL_ID        = int(os.environ["CHANNEL_ID"])
+CHAT_ID           = int(os.environ["CHAT_ID"])
+VIP_CHANNEL_ID    = int(os.environ["VIP_CHANNEL_ID"])
+VIP_CHAT_ID       = int(os.environ["VIP_CHAT_ID"])
+TIKTOK_URL        = os.environ.get("TIKTOK_URL", "https://tiktok.com/")
+INSTAGRAM_URL     = os.environ.get("INSTAGRAM_URL", "https://instagram.com/")
+MAIN_CHANNEL_URL  = os.environ.get("MAIN_CHANNEL_URL", "https://t.me/")
 
 bot = telebot.TeleBot(TOKEN)
 
